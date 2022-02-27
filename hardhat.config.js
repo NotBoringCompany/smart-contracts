@@ -20,30 +20,30 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
  module.exports = {
-  defaultNetwork: "testnet",
+  defaultNetwork: "polygonTestnet",
   networks: {
 
     polygonTestnet: {
       url: "https://rpc-mumbai.maticvigil.com",
       chainId: 80001,
-      accounts: accountOne
+      accounts: [accountOne]
     },
     ganache: {
       url: "HTTP://127.0.0.1:7545",
       chainId: 1337,
-      accounts: accountOne
+      accounts: [accountOne]
     },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
       gasPrice: 20000000000,
-      accounts: accountOne
+      accounts: [accountOne]
     },
     bscMainnet: {
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
       gasPrice: 20000000000,
-      accounts: accountOne
+      accounts: [accountOne]
     }
   },
   solidity: {

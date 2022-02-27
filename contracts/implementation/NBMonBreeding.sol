@@ -77,6 +77,13 @@ contract NBMonBreeding is NBMonMinting {
         require(_maleParent.nbmonStats[0] == 1, "NBMonBreeding: Male parent is not a male gender");
         require(_femaleParent.nbmonStats[0] == 2, "NBMonBreeding: Female parent is not a female gender");
 
-        mintNBMon(_owner, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves);
+        mintNBMon(_owner, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves, true);
+    }
+
+    /**
+     * @dev Evolves 
+     */
+    function evolveFromEgg(uint256 _nbmonId) public {
+        
     }
 }

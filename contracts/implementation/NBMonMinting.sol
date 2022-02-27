@@ -23,14 +23,15 @@ contract NBMonMinting is NBMonCore {
     // calls _mintNBMon.
     function mintNBMon(
         address _owner,
-        uint32[] memory _nbmonStats,
-        uint8[] memory _types,
+        string[] memory _nbmonStats,
+        string[] memory _types,
         uint8[] memory _potential,
-        uint16[] memory _passives,
-        uint8[] memory _inheritedPassives,
-        uint8[] memory _inheritedMoves
+        string[] memory _passives,
+        string[] memory _inheritedPassives,
+        string[] memory _inheritedMoves,
+        bool _isEgg
     ) public whenMintingAllowed onlyMinter {
-        _mintNBMon(_owner, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves);
+        _mintNBMon(_owner, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves, _isEgg);
     }
 
      /**
@@ -39,12 +40,13 @@ contract NBMonMinting is NBMonCore {
      */
     function _mintNBMon(
         address _owner,
-        uint32[] memory _nbmonStats,
-        uint8[] memory _types,
+        string[] memory _nbmonStats,
+        string[] memory _types,
         uint8[] memory _potential,
-        uint16[] memory _passives,
-        uint8[] memory _inheritedPassives,
-        uint8[] memory _inheritedMoves
+        string[] memory _passives,
+        string[] memory _inheritedPassives,
+        string[] memory _inheritedMoves,
+        bool _isEgg
     ) private {
         NBMon memory _nbmon = NBMon(
             currentNBMonCount,
@@ -57,15 +59,13 @@ contract NBMonMinting is NBMonCore {
             _passives,
             _inheritedPassives,
             _inheritedMoves,
-            false
+            _isEgg
         );
         nbmons.push(_nbmon);
         ownerNBMons[_owner].push(_nbmon);
         _safeMint(_owner, currentNBMonCount);
         ownerNBMonIds[_owner].push(currentNBMonCount);
         currentNBMonCount++;
-        ownerNBMonCount[_owner]++;
         emit NBMonMinted(currentNBMonCount, _owner);
-
     }
 }

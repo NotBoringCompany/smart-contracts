@@ -1,0 +1,12 @@
+///maps genus to types
+_type["Lamox"] = ["Spirit", "Electric"];
+_type["Licorine"] = ["Fire", "Earth"];
+_type["Birvo"] = ["Wind"];
+_type["Dranexx"] = ["Spirit", "Psychic"];
+_type["Heree"] = ["Nature"];
+_type["Milnas"] = ["Fire"];
+_type["Schoggi"] = ["Ordinary"];
+_type["Pongu"] = ["Frost", "Crystal"];
+_type["Prawdek"] = ["Nature", "Toxic"];
+_type["Roggo"] = ["Earth", "Nature"];
+_type["Todillo"] = ["Earth", "Reptile"];
