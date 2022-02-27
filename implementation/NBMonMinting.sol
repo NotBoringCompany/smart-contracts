@@ -29,8 +29,7 @@ contract NBMonMinting is NBMonCore {
         uint16[] memory _passives,
         uint8[] memory _inheritedPassives,
         uint8[] memory _inheritedMoves
-
-        ) public whenMintingAllowed onlyMinter {
+    ) public whenMintingAllowed onlyMinter {
         _mintNBMon(_owner, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves);
     }
 
