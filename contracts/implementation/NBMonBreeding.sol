@@ -7,9 +7,6 @@ import "./NBMonMinting.sol";
 
 /**
  * @dev This contract is used as a basis for the breeding logic for NBMonCore.
- * This contract does NOT have any of the advanced features yet (e.g. using artifacts to boost certain stats when breeding).
- * Note: Some of the values/variables here are hard-coded based on current logic from the different .txt files. Should there be any change:
- * a new breeding contract will replace this since it will NOT affect the main NBMonCore contract. 
  */
 contract NBMonBreeding is NBMonMinting {
     /// @dev Emitted when breeding is set to 'allowed'. Triggered by _owner. 
@@ -49,21 +46,12 @@ contract NBMonBreeding is NBMonMinting {
     }
 
     /**
-     * @dev breeds 2 NBMons to give birth to an offspring
-     * _maleId NEEDS to be a male and _femaleId needs to be a female for simplicity sake (from current gender logic)
-     * this requirement will be implemented in the frontend
-     * Note: All calculations will be done in the backend
+     * @dev breeds 2 NBMons to give off an egg. This egg will have no stats of the actual NBMon until it is allowed to be hatched (minted).
      */
     function breedNBMon(
         uint256 _maleId,
         uint256 _femaleId,
-        address _owner,
-        uint32[] memory _nbmonStats,
-        uint8[] memory _types,
-        uint8[] memory _potential,
-        uint16[] memory _passives,
-        uint8[] memory _inheritedPassives,
-        uint8[] memory _inheritedMoves
+        address _owner
     ) public whenBreedingAllowed {
         NBMon memory _maleParent = nbmons[_maleId - 1];
         NBMon memory _femaleParent = nbmons[_femaleId - 1];
@@ -73,17 +61,26 @@ contract NBMonBreeding is NBMonMinting {
 
         // double checking that male parent and female parent have different genders 
         // most likely not required but is added just in case to save gas fees and revert the transaction here if requirement is not met
-        require(_maleParent.nbmonStats[0] != _femaleParent.nbmonStats[0], "NBMonBreeding: Gender needs to be different");
-        require(_maleParent.nbmonStats[0] == 1, "NBMonBreeding: Male parent is not a male gender");
-        require(_femaleParent.nbmonStats[0] == 2, "NBMonBreeding: Female parent is not a female gender");
+        require(keccak256(abi.encodePacked(_maleParent.nbmonStats[0])) == "male", "NBMonBreeding: Male parent is not a male gender");
+        require(keccak256(abi.encodePacked(_femaleParent.nbmonStats[0])) == "female", "NBMonBreeding: Female parent is not a female gender");
 
-        mintNBMon(_owner, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves, true);
+        mintEgg(_owner);
     }
 
     /**
-     * @dev Evolves 
+     * @dev Evolves from an egg and mints the actual NBMon with stats. 
      */
-    function evolveFromEgg(uint256 _nbmonId) public {
-        
+    function evolveFromEgg(
+        uint256 _eggId,
+        string[] memory _nbmonStats,
+        string[] memory _types,
+        uint8[] memory _potential,
+        string[] memory _passives,
+        string[] memory _inheritedPassives,
+        string[] memory _inheritedMoves
+    ) public {
+        //checks if the owner owns the specified _eggId
+        require(nbmonEggs[_eggId - 1].owner == _msgSender(), "NBMonBreeding: Owner does not own the specified egg ID");
+        mintNBMonFromEgg(_msgSender(), _eggId, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves);
     }
 }

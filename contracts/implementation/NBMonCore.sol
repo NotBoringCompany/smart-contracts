@@ -59,24 +59,38 @@ contract NBMonCore is NFTCore {
         // if minted, it will be an empty array
         // check '../gamestats/moveset.txt' for more info
         string[] inheritedMoves; 
+    }
 
-        // checks if offspring is still an egg based on baseEvolutionDuration.
-        // logic: if bornAt + baseEvolutionDuration >= now, user can evolve NBMon.
-        bool isEgg; 
+    /**
+     * @dev Instance of an NBMon Egg. NBMon Eggs are essentially NBMons before they hatch and evolve to an adult NBMon.
+     */
+    struct NBMonEgg {
+        uint256 eggId;
+        address owner;
+        uint256 bornAt;
     }
 
     NBMon[] internal nbmons;
+    NBMonEgg[] public nbmonEggs;
 
     // mapping from owner address to array of IDs of the NBMons the owner owns
     mapping(address => uint256[]) internal ownerNBMonIds;
     // mapping from owner address to list of NBMons owned;
     mapping(address => NBMon[]) internal ownerNBMons;
+
+    // mapping from owner address to array of IDs of the NBMons the owner owns
+    mapping(address => uint256[]) internal ownerNBMonEggIds;
+    // mapping from owner address to list of NBMons owned;
+    mapping(address => NBMonEgg[]) internal ownerNBMonEggs;
     
     // checks the current NBMon supply for enumeration. Starts at 1 when contract is deployed.
     uint256 public currentNBMonCount = 1;
 
     event NBMonMinted(uint256 indexed _nbmonId, address indexed _owner);
     event NBMonBurned(uint256 indexed _nbmonId);
+
+    event NBMonEggMinted(uint256 indexed _eggId, address indexed _owner);
+    event NBMonEggBurned(uint256 indexed _eggId);
 
     // returns a single NBMon given an ID
     function getNBMon(uint256 _nbmonId) public view returns (NBMon memory) {
@@ -102,6 +116,32 @@ contract NBMonCore is NFTCore {
 
         emit NBMonBurned(_nbmonId);
     }
+
+    // returns a single NBMon Egg given an ID
+    function getNBMonEgg(uint256 _eggId) public view returns (NBMonEgg memory) {
+        require(_exists(_eggId), "NBMonEggCore: NBMon Egg with the specified ID does not exist");
+        return nbmonEggs[_eggId - 1];
+    }
+
+    // returns all NBMon Eggs owned by the owner
+    function getAllNBMonEggsOfOwner(address _owner) public view returns (NBMonEgg[] memory) {
+        return ownerNBMonEggs[_owner];
+    }
+
+    // returns the NBMon Egg IDs of the owner's NBMons
+    function getOwnerNBMonEggIds(address _owner) public view returns (uint256[] memory) {
+        return ownerNBMonEggIds[_owner];
+    }
+
+    // burns and deletes the NBMon Egg from circulating supply
+    function burnNBMonEgg(uint256 _eggId) public {
+        require(_exists(_eggId), "NBMonEggCore: Burning non-existant NBMon Egg");
+        require(nbmonEggs[_eggId - 1].owner == _msgSender(), "NBMonEggCore: Owner does not own specified NBMon Egg.");
+        _burn(_eggId);
+
+        emit NBMonEggBurned(_eggId);
+    }
+
     /**
      * @dev Singular purpose functions designed to make reading code easier for front-end
      * Otherwise not needed since getNBMon and getAllNBMonsOfOwner and getNBMon contains complete information at once
