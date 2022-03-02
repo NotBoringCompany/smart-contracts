@@ -4,11 +4,10 @@ pragma solidity ^0.8.6;
 
 import "./NBMonCore.sol";
 
-contract NBMonMinting is NBMonCore {
-
-    constructor() {
-        _mintingAllowed = true;
-    }
+/**
+ * @dev Contract used for NBMon minting logic
+ */
+abstract contract NBMonMinting is NBMonCore {
 
     bool public _mintingAllowed;
 
@@ -17,115 +16,56 @@ contract NBMonMinting is NBMonCore {
         _;
     }
 
-    // calls _mintEgg.
-    function mintEgg(address _owner) public whenMintingAllowed onlyMinter {
-        _mintEgg(_owner);
-    }
-
-    // mints an NBMonEgg (from breeding).
-    function _mintEgg(address _owner) private {
-        NBMonEgg memory _nbmonEgg = NBMonEgg(
-            currentNBMonCount,
-            _owner,
-            block.timestamp
-        );
-        nbmonEggs.push(_nbmonEgg);
-        ownerNBMonEggs[_owner].push(_nbmonEgg);
-        _safeMint(_owner, currentNBMonCount);
-        ownerNBMonEggIds[_owner].push(currentNBMonCount);
-        emit NBMonEggMinted(currentNBMonCount, _owner);
-        currentNBMonCount++;
-    }
-
-    // calls _mintNBMonFromEgg.
-    function mintNBMonFromEgg(
-        address _owner,
-        uint256 _eggId,
-        string[] memory _nbmonStats,
-        string[] memory _types,
-        uint8[] memory _potential,
-        string[] memory _passives,
-        string[] memory _inheritedPassives,
-        string[] memory _inheritedMoves
-    ) public whenMintingAllowed onlyMinter {
-        _mintNBMonFromEgg(_owner, _eggId, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves);
-    }
-
     // calls _mintNBMon.
     function mintNBMon(
+        uint256[] memory _parents,
         address _owner,
+        uint32 _hatchingDuration,
         string[] memory _nbmonStats,
         string[] memory _types,
         uint8[] memory _potential,
         string[] memory _passives,
         string[] memory _inheritedPassives,
-        string[] memory _inheritedMoves
+        string[] memory _inheritedMoves,
+        bool _isEgg
     ) public whenMintingAllowed onlyMinter {
-        _mintNBMon(_owner, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves);
+        _mintNBMon(_parents, _owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves, _isEgg);
     }
 
      /**
-     * @dev Mints an NBMon from minting events.
+     * @dev Mints an NBMon, either from minting events or from breeding. If through breeding, the stats will be empty and isEgg will be set to true until it can hatch.
      */
     function _mintNBMon(
+        uint256[] memory _parents,
         address _owner,
+        uint32 _hatchingDuration,
         string[] memory _nbmonStats,
         string[] memory _types,
         uint8[] memory _potential,
         string[] memory _passives,
         string[] memory _inheritedPassives,
-        string[] memory _inheritedMoves
+        string[] memory _inheritedMoves,
+        bool _isEgg
     ) private {
         NBMon memory _nbmon = NBMon(
             currentNBMonCount,
+            _parents,
             _owner,
             block.timestamp,
             block.timestamp,
+            _hatchingDuration,
             _nbmonStats,
             _types,
             _potential,
             _passives,
             _inheritedPassives,
-            _inheritedMoves
+            _inheritedMoves,
+            _isEgg
         );
-        nbmons.push(_nbmon);
-        ownerNBMons[_owner].push(_nbmon);
         _safeMint(_owner, currentNBMonCount);
+        nbmons.push(_nbmon);
         ownerNBMonIds[_owner].push(currentNBMonCount);
         emit NBMonMinted(currentNBMonCount, _owner);
         currentNBMonCount++;
-    }
-    
-    /**
-     * @dev Mints an NBMon FROM AN EGG after it is hatchable (done by breeding). The egg will be burned.
-     */
-    function _mintNBMonFromEgg(
-        address _owner,
-        uint256 _eggId,
-        string[] memory _nbmonStats,
-        string[] memory _types,
-        uint8[] memory _potential,
-        string[] memory _passives,
-        string[] memory _inheritedPassives,
-        string[] memory _inheritedMoves
-    ) private {
-        NBMon memory _nbmon = NBMon(
-            _eggId,
-            _owner,
-            block.timestamp,
-            block.timestamp,
-            _nbmonStats,
-            _types,
-            _potential,
-            _passives,
-            _inheritedPassives,
-            _inheritedMoves
-        );
-        burnNBMonEgg(_eggId);
-        nbmons.push(_nbmon);
-        ownerNBMons[_owner].push(_nbmon);
-        _safeMint(_owner, _eggId);
-        ownerNBMonIds[_owner].push(_eggId);
-        emit NBMonMinted(_eggId, _owner);
-    }
+    }  
 }

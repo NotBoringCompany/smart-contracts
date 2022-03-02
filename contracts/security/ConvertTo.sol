@@ -3,9 +3,9 @@
 pragma solidity ^0.8.6;
 
 /**
- * @dev Contract that implements conversion use cases.
+ * @dev Library that implements conversion use cases.
  */
-contract ConvertTo {
+library ConvertTo {
     function StringToInt(string memory _str) public pure returns(uint256) {
         uint val = 0;
         bytes memory stringBytes = bytes(_str);
