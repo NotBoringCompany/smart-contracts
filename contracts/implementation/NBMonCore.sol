@@ -23,6 +23,9 @@ abstract contract NBMonCore is NFTCore {
         // current owner for NBMon, alternatively use BEP721.ownerOf.
         address owner;
 
+        // access[0] checks for tradability (marketplace access), access[1] checks for breedability (ability to breed)
+        bool[] access;
+
         // when minted through minting events, this will be bornAt. Otherwise, this refers to the time that the NBMon is minted after the egg is hatched.
         uint256 hatchedAt;
 
@@ -144,6 +147,9 @@ abstract contract NBMonCore is NFTCore {
      */
     function getNbmonStats(uint256 _nbmonId) public view returns (string[] memory) {
         return nbmons[_nbmonId - 1].nbmonStats;
+    }
+    function getAccess(uint256 _nbmonId) public view returns (bool[] memory) {
+        return nbmons[_nbmonId - 1].access;
     }
     function getParents(uint256 _nbmonId) public view returns (uint256[] memory) {
         return nbmons[_nbmonId - 1].parents;

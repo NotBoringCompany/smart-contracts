@@ -25,7 +25,7 @@ contract NBMonBreeding is NBMonMinting {
 
     // modifier for functions that require _breedingAllowed to be true to continue.
     modifier whenBreedingAllowed() {
-        require(_breedingAllowed, "NBMonBreedingExtended: Breeding allowed");
+        require(_breedingAllowed, "NBMonBreeding: Breeding allowed");
         _;
     }
 
@@ -53,6 +53,7 @@ contract NBMonBreeding is NBMonMinting {
     function breedNBMon(
         uint256 _maleId,
         uint256 _femaleId,
+        bool[] memory _access,
         // rarity will determine the hatching duration. therefore, the user will know what rarity the nbmon has.
         uint32 _hatchingDuration,
         // will only contain rarity. other stats within nbmonStats will be empty for now.
@@ -71,24 +72,36 @@ contract NBMonBreeding is NBMonMinting {
         require(keccak256(abi.encodePacked(_maleParent.nbmonStats[0])) == keccak256(abi.encodePacked("male")), "NBMonBreeding: Male parent is not a male gender");
         require(keccak256(abi.encodePacked(_femaleParent.nbmonStats[0])) == keccak256(abi.encodePacked("female")), "NBMonBreeding: Female parent is not a female gender");
 
+        require(_maleParent.isEgg == false && _femaleParent.isEgg == false, "NBMonBreeding: Both parents must not be eggs"); 
+        // checks if both male and female parents are able to breed. access[1] checks for breedability.
+        require(_maleParent.access[1] == true && _femaleParent.access[1] == true, "NBMonBreeding: Both parents must be able to breed");
+
         /**
          * @dev Reduces fertility points of both parents to mint the NBMon egg.
          */
-        _maleParent.nbmonStats[6] = _maleFertilityAfter;
-        _femaleParent.nbmonStats[6] = _femaleFertilityAfter;
+        _maleParent.nbmonStats[5] = _maleFertilityAfter;
+        _femaleParent.nbmonStats[5] = _femaleFertilityAfter;
 
         // create an instance of the parents array
         uint256[] memory _parents = new uint256[](2);
         _parents[0] = _maleId;
-        _parents[1] = _femaleId;
+        _parents[1] = _femaleId; 
+
+        string[] memory _types;
+        uint8[] memory _potential;
+        string[] memory _passives;
+        string[] memory _inheritedPassives;
+        string[] memory _inheritedMoves;
+
+        
 
         
         // mints an nbmon in the form of an egg (isEgg == true). instantiates multiple empty arrays since they will only be added when hatched.
-        mintNBMon(_parents, _msgSender(), _hatchingDuration, _nbmonStats, new string[](0), new uint8[](0), new string[](0), new string[](0), new string[](0), true);
+        mintNBMon(_parents, _msgSender(), _access, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _inheritedPassives, _inheritedMoves, true);
     }
 
     /**
-     * @dev Hatches from an egg and mints the actual NBMon with stats. 
+     * @dev Hatches from an egg and updates the actual NBMon with stats. 
      */
     function hatchFromEgg(
         uint256 _nbmonId,
@@ -99,10 +112,11 @@ contract NBMonBreeding is NBMonMinting {
         string[] memory _inheritedPassives,
         string[] memory _inheritedMoves
     ) public {
-        NBMon storage _nbmon = nbmons[_nbmonId];
+        NBMon storage _nbmon = nbmons[_nbmonId - 1];
 
         require(_nbmon.owner == _msgSender(), "NBMonBreeding: Caller does not own specified NBMon.");
-        require(_nbmon.hatchedAt + _nbmon.hatchingDuration >= block.timestamp, "NBMonBreeding: Egg is not ready to hatch yet.");
+        require(_nbmon.isEgg == true, "NBMonBreeding: Specified NBMon is already an adult.");
+        require(_nbmon.hatchedAt + _nbmon.hatchingDuration <= block.timestamp, "NBMonBreeding: Egg is not ready to hatch yet.");
 
         // updates all the stats of the NBMon
         _nbmon.hatchedAt = block.timestamp;
