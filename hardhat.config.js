@@ -1,7 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require('dotenv').config();
 
-const accountOne = process.env.JUANDOGELS_WALLET;
+const accountOne = process.env.WALLET_1;
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -43,6 +43,11 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
       gasPrice: 20000000000,
+      accounts: [accountOne]
+    },
+    ethRinkeby: {
+      url: "https://speedy-nodes-nyc.moralis.io/86485606baa5a8de669b2196/eth/rinkeby",
+      chainId: 4,
       accounts: [accountOne]
     }
   },
