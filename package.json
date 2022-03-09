@@ -30,5 +30,8 @@
     "ethers": "^5.0.0",
     "hardhat": "^2.8.4",
     "node-fetch": "^2.6.7"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.5.0"
   }
 }

@@ -73,13 +73,13 @@ abstract contract NBMonCore is NFTCore {
         bool isEgg; 
     }
 
-    NBMon[] public nbmons;
+    NBMon[] internal nbmons;
 
     // mapping from owner address to array of IDs of the NBMons the owner owns
     mapping(address => uint256[]) internal ownerNBMonIds;
     
     // checks the current NBMon supply for enumeration. Starts at 1 when contract is deployed.
-    uint256 public currentNBMonCount = 1;
+    uint256 internal currentNBMonCount = 1;
 
     event NBMonMinted(uint256 indexed _nbmonId, address indexed _owner);
     event NBMonBurned(uint256 indexed _nbmonId);
