@@ -11,7 +11,9 @@ contract NBCOpenSeaTest is NFTCore {
     Counters.Counter private currentTokenId;
 
     constructor() BEP721("NBC OpenSea Test", "NBCOT") {
-        setBaseURI("https://marketplace.nbcompany.io/test/opensea/nbcot/");
+        setBaseURI("https://kkrudhwauj3f.usemoralis.com/");
+        mintTo(_msgSender());
+        mintTo(_msgSender());
     }
 
     function mintTo(address _to) public returns (uint256) {

@@ -19,7 +19,7 @@ contract NBMonBreeding is NBMonMinting {
 
     constructor() BEP721("NBMon", "NBMON") {
         // BaseURI changes depending on the network.
-        setBaseURI("https://marketplace.nbcompany.io/nbmons/rinkeby/");
+        setBaseURI("https://marketplace.nbcompany.io/nbmons/");
         _mintingAllowed = true;
         _breedingAllowed = true;
     }

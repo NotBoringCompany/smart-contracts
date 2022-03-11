@@ -1,7 +1,12 @@
+/**
+* @type import('hardhat/config').HardhatUserConfig
+*/
+
 require("@nomiclabs/hardhat-waffle");
 require('dotenv').config();
 
 const accountOne = process.env.WALLET_1;
+const moralisAPINode = process.env.MORALIS_NODEAPI;
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -22,33 +27,32 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  module.exports = {
   defaultNetwork: "polygonTestnet",
   networks: {
-
     polygonTestnet: {
       url: "https://rpc-mumbai.maticvigil.com",
       chainId: 80001,
-      accounts: [accountOne]
+      accounts: [`0x${accountOne}`]
     },
     ganache: {
       url: "HTTP://127.0.0.1:7545",
       chainId: 1337,
-      accounts: [accountOne]
+      accounts: [`0x${accountOne}`]
     },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
       gasPrice: 20000000000,
-      accounts: [accountOne]
+      accounts: [`0x${accountOne}`]
     },
     bscMainnet: {
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
       gasPrice: 20000000000,
-      accounts: [accountOne]
+      accounts: [`0x${accountOne}`]
     },
     ethRinkeby: {
-      url: "https://speedy-nodes-nyc.moralis.io/86485606baa5a8de669b2196/eth/rinkeby",
+      url: `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`,
       chainId: 4,
-      accounts: [accountOne]
+      accounts: [`0x${accountOne}`]
     }
   },
   solidity: {
