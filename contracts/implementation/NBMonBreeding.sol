@@ -113,6 +113,7 @@ contract NBMonBreeding is NBMonMinting {
         string[] memory _inheritedPassives,
         string[] memory _inheritedMoves
     ) public {
+        require(_exists(_nbmonId), "NBMonBreeding: Specified NBMon does not exist");
         NBMon storage _nbmon = nbmons[_nbmonId - 1];
 
         require(_nbmon.owner == _msgSender(), "NBMonBreeding: Caller does not own specified NBMon.");

@@ -2,14 +2,16 @@
 
 pragma solidity ^0.8.6;
 
-import "../BEP721/NFTCore.sol";
+import "../BEP721A/NFTCoreA.sol";
 
 /**
  * @dev The first and rarest generation of NBMons that will ever be minted. Only 4500 of these will exist. They are NOT breedable and have a higher chance to be more powerful than their ordinary NBMon counterparts. 
  * Note: This contract does NOT have the newer, gas-efficient ERC721A standard which mints huge batches at almost the same price as minting only one. That version will be on a separate contract.
  * Most of the contract will have the same logic as NBMonCore.sol. Please refer to that contract to understand the variables and methods used.
+ *
+ * Uses NFTCoreA which inherits from BEP721A for cheaper batch minting.
  */
-abstract contract GenesisNBMonCore is NFTCore {
+abstract contract GenesisNBMonCoreA is NFTCoreA {
     /**
      * @dev Instance of a genesis NBMon.
      */
@@ -63,7 +65,7 @@ abstract contract GenesisNBMonCore is NFTCore {
         // checks if the caller of the function owns the specified _nbmonId
         require(genesisNBMons[_nbmonId - 1].owner == _msgSender(), "NBMonCore: Owner does not own specified NBMon.");
         // burns the genesis nbmon
-        BEP721URIStorage._burn(_nbmonId);
+        BEP721AURIStorage._burn(_nbmonId);
 
         /**
          * @dev removal of genesis NBMon ID from owner's list of owned NBMons (ownerNBMonIds).

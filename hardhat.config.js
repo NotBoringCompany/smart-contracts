@@ -51,6 +51,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     },
     ethRinkeby: {
       url: `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`,
+      // url: 'https://eth-rinkeby.alchemyapi.io/v2/WaN_fLthgNG17X2qVlz3DLj3K8AqRi9L',
       chainId: 4,
       accounts: [`0x${accountOne}`]
     }

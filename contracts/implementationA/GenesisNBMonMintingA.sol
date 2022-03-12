@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.6;
 
-import "./GenesisNBMonCore.sol";
+import "./GenesisNBMonCoreA.sol";
 
-contract GenesisNBMonMinting is GenesisNBMonCore {
-    constructor() BEP721("Genesis NBMon", "G-NBMON") {
+contract GenesisNBMonMintingA is GenesisNBMonCoreA {
+    constructor() BEP721A("Genesis NBMon", "G-NBMON") {
         // this base URI will only be temporary. it will change during proper deployment.
         setBaseURI("https://marketplace.nbcompany.io/nbmons/genesis/");
         _mintingAllowed = true;
