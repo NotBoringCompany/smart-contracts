@@ -40,8 +40,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
-      gas: 50000000,
-      gasPrice: 9000000000000,
+      gasPrice: 20000000000,
       accounts: [`0x${accountOne}`]
     },
     bscMainnet: {

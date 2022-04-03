@@ -73,8 +73,13 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
 
     // a modifier for minting to ensure that the caller does not mint more than the specified mint limit
     modifier belowMintLimit(address _to) {
-        require(amountMinted[_to] < mintLimit, "GenesisNBMonMintingA: Mint limit per user exceeded. Cannot mint more.");
-        _;
+        // if address specified is admin (or also minter), mint limit == 100 (dev mint)
+        if (_to == admin) {
+            require(amountMinted[_to] < 100, "GenesisNBMonMintingA: Mint limit for dev team exceeded. Cannot mint more.");
+        } else {
+            require(amountMinted[_to] < mintLimit, "GenesisNBMonMintingA: Mint limit per user exceeded. Cannot mint more.");
+            _;
+        }
     }
 
     // a modifier for minting to ensure that the current supply is less than the allowed supply limit for genesis NBMons
