@@ -80,6 +80,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
     // a modifier for minting to ensure that the current supply is less than the allowed supply limit for genesis NBMons
     modifier belowSupplyLimit() {
         require(totalSupply() < supplyLimit, "GenesisNBMonMintingA: Supply limit reached. Cannot mint more.");
+        _;
     }
 
     // mints a genesis egg (for whitelisted people)
