@@ -10,7 +10,10 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         setBaseURI("https://marketplace.nbcompany.io/nbmons/genesis/");
         _mintingAllowed = true;
         mintLimit = 1;
-        supplyLimit = 5000;
+        //total = 5000
+        devMintLimit = 350;
+        publicSupplyLimit = 4580;
+        adoptionIncentivesSupplyLimit = 70;
     }
 
     /// @dev Emitted when breeding is set to 'allowed'. Triggered by _owner. 
@@ -41,15 +44,19 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
     }
 
     // checks whether a given address is whitelisted to mint a Genesis NBMon
-    mapping (address => bool) whitelisted;
+    mapping (address => bool) public whitelisted;
     // checks how many NBMon eggs the address has minted. if it already reaches the limit, the address cannot mint anymore.
-    mapping (address => uint8) amountMinted;
+    mapping (address => uint16) public amountMinted;
 
     // limits the mint amount per person, regardless if whitelisted or not
-    uint8 public mintLimit;
+    uint16 public mintLimit;
+    // limits the amount the dev is able to mint.
+    uint16 public devMintLimit;
 
-    // limits the supply of the genesis NBMons. Cannot mint more than this amount ever.
-    uint16 public supplyLimit;
+    // limits the supply of the genesis NBMons that the public can mint.
+    uint16 public publicSupplyLimit;
+    // limits the supply of the genesis NBMons reserved for KOLs, influencers etc.
+    uint16 public adoptionIncentivesSupplyLimit;
 
     // admin only function to whitelist an address
     function whitelistAddress(address _to) public onlyAdmin {
@@ -67,57 +74,99 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
     }
     
     // changes the mint limit
-    function changeMintLimit(uint8 _mintLimit) public onlyAdmin {
+    function changeMintLimit(uint16 _mintLimit) public onlyAdmin {
         mintLimit = _mintLimit;
     }
 
     // a modifier for minting to ensure that the caller does not mint more than the specified mint limit
-    modifier belowMintLimit(address _to) {
-        // if address specified is admin (or also minter), mint limit == 100 (dev mint)
-        if (_to == admin) {
-            require(amountMinted[_to] < 100, "GenesisNBMonMintingA: Mint limit for dev team exceeded. Cannot mint more.");
-        } else {
-            require(amountMinted[_to] < mintLimit, "GenesisNBMonMintingA: Mint limit per user exceeded. Cannot mint more.");
-            _;
-        }
+    modifier belowMintLimit(uint16 _amountToMint, address _to) {
+        uint16 _totalToMint = amountMinted[_to] + _amountToMint;
+        require(_totalToMint <= mintLimit, "GenesisNBMonMintingA: Mint limit per user exceeded.");
+        _;
+    }
+
+    // a modifier for minting to ensure that the developer does not mint more than the specified dev mint limit
+    modifier belowDevMintLimit(uint16 _amountToMint, address _dev) {
+        uint16 _totalToMint = amountMinted[_dev] + _amountToMint;
+        require(_totalToMint <= devMintLimit, "GenesisNBMonMintingA: Dev mint limit exceeded.");
+        _;
+    }
+
+    // a modifier for minting to ensure that the amount to be minted is not more than the dev mint limit + adoption incentives supply limit
+    modifier belowAdoptionIncentivesSupplyLimit(uint16 _amountToMint, address _dev) {
+        uint16 _totalToMint = amountMinted[_dev] + _amountToMint;
+        require(_totalToMint <= (devMintLimit + adoptionIncentivesSupplyLimit), "GenesisNBMonMintingA: Supply for dev mint + adoptionIncentives limit reached. Cannot mint more.");
+        _;
     }
 
     // a modifier for minting to ensure that the current supply is less than the allowed supply limit for genesis NBMons
-    modifier belowSupplyLimit() {
-        require(totalSupply() < supplyLimit, "GenesisNBMonMintingA: Supply limit reached. Cannot mint more.");
+    modifier belowPublicSupplyLimit(uint16 _amountToMint) {
+        uint16 _totalToMint = uint16(totalSupply()) + _amountToMint;
+        require(_totalToMint <= publicSupplyLimit, "GenesisNBMonMintingA: Supply limit reached. Cannot mint more.");
         _;
+    }
+
+    // mints genesis eggs (for dev)
+    function devGenesisEggMint(
+        uint16 _amountToMint,
+        uint32 _hatchingDuration,
+        string[] memory _nbmonStats,
+        string[] memory _types,
+        uint8[] memory _potential,
+        string[] memory _passives,
+        bool _isEgg
+    ) public onlyMinter belowDevMintLimit(_amountToMint, _msgSender()) whenMintingAllowed {
+        _mintGenesisEgg(_msgSender(), _amountToMint, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
+        amountMinted[_msgSender()] += _amountToMint;
+    }
+
+    // mints genesis eggs to dev's address first, to be given to KOLs, influencers etc. for later
+    function adoptionIncentivesGenesisEggMint(
+        uint16 _amountToMint,
+        uint32 _hatchingDuration,
+        string[] memory _nbmonStats,
+        string[] memory _types,
+        uint8[] memory _potential,
+        string[] memory _passives,
+        bool _isEgg
+    ) public onlyMinter belowAdoptionIncentivesSupplyLimit(_amountToMint, _msgSender()) whenMintingAllowed {
+        _mintGenesisEgg(_msgSender(), _amountToMint, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
+        amountMinted[_msgSender()] += _amountToMint;
     }
 
     // mints a genesis egg (for whitelisted people)
     function whitelistedGenesisEggMint(
         address _owner,
+        uint16 _amountToMint,
         uint32 _hatchingDuration,
         string[] memory _nbmonStats,
         string[] memory _types,
         uint8[] memory _potential,
         string[] memory _passives,
         bool _isEgg
-    ) public onlyMinter isWhitelisted(_owner) belowMintLimit(_owner) belowSupplyLimit whenMintingAllowed {
-        _mintGenesisEgg(_owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
+    ) public onlyMinter isWhitelisted(_owner) belowMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
+        _mintGenesisEgg(_owner, _amountToMint, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
         amountMinted[_owner]++;
     }
 
     // mints a genesis egg (for public)
-    function _publicGenesisEggMint(
+    function publicGenesisEggMint(
         address _owner,
+        uint16 _amountToMint,
         uint32 _hatchingDuration,
         string[] memory _nbmonStats,
         string[] memory _types,
         uint8[] memory _potential,
         string[] memory _passives,
         bool _isEgg
-    ) public onlyMinter belowMintLimit(_owner) belowSupplyLimit whenMintingAllowed {
-        _mintGenesisEgg(_owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
+    ) public onlyMinter belowMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
+        _mintGenesisEgg(_owner, _amountToMint, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
         amountMinted[_owner]++;
     }
 
     function _mintGenesisEgg(
         address _owner,
+        uint16 _amountToMint,
         uint32 _hatchingDuration,
         string[] memory _nbmonStats,
         string[] memory _types,
@@ -137,7 +186,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
             _passives,
             _isEgg
         );
-        _safeMint(_owner, 1);
+        _safeMint(_owner, _amountToMint);
         genesisNBMons.push(_genesisNBMon);
         ownerGenesisNBMonIds[_owner].push(currentGenesisNBMonCount);
         emit GenesisNBMonMinted(currentGenesisNBMonCount, _owner);

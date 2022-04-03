@@ -89,7 +89,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * To change the starting tokenId, please override this function.
      */
     function _startTokenId() internal view virtual returns (uint256) {
-        return 0;
+        return 1;
     }
 
     /**
