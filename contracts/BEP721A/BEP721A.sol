@@ -1,5 +1,5 @@
-//SPDX-License-Identifier: MIT
-//Creator: Chiru Labs
+// SPDX-License-Identifier: MIT
+// Creator: Chiru Labs
 
 pragma solidity ^0.8.6;
 
@@ -12,33 +12,20 @@ import "../BEP165/BEP165.sol";
 import "../security/Strings.sol";
 import "../security/Pausable.sol";
 
-error ApprovalCallerNotOwnerNorApproved();
-error ApprovalQueryForNonexistentToken();
-error ApproveToCaller();
-error ApprovalToCurrentOwner();
-error BalanceQueryForZeroAddress();
-error MintedQueryForZeroAddress();
-error BurnedQueryForZeroAddress();
-error AuxQueryForZeroAddress();
-error MintToZeroAddress();
-error MintZeroQuantity();
-error OwnerQueryForNonexistentToken();
-error TransferCallerNotOwnerNorApproved();
-error TransferFromIncorrectOwner();
-error TransferToNonBEP721ReceiverImplementer();
-error TransferToZeroAddress();
-error URIQueryForNonexistentToken();
+// error ApprovalCallerNotOwnerNorApproved();
+// error ApprovalQueryForNonexistentToken();
+// error ApproveToCaller();
+// error ApprovalToCurrentOwner();
+// error BalanceQueryForZeroAddress();
+// error MintToZeroAddress();
+// error MintZeroQuantity();
+// error OwnerQueryForNonexistentToken();
+// error TransferCallerNotOwnerNorApproved();
+// error TransferFromIncorrectOwner();
+// error TransferToNonBEP721ReceiverImplementer();
+// error TransferToZeroAddress();
+// error URIQueryForNonexistentToken();
 
-
-/**
- * @dev Almost an exact implementation of the newly established BEP721A standard by Chiru Labs which aims to lower gas fees for batch minting.
- *
- * Assumes serials are sequentially minted starting at _startTokenId() (defaults to 0, e.g. 0, 1, 2, 3..).
- *
- * Assumes that an owner cannot have more than 2**64 - 1 (max value of uint64) of supply.
- *
- * Assumes that the maximum token id cannot exceed 2**256 - 1 (max value of uint256).
- */
 contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
     using Address for address;
     using Strings for uint256;
@@ -106,7 +93,6 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
     }
 
     /**
-     * @dev See {IBEP721Enumerable-totalSupply}.
      * @dev Burned tokens are calculated here, use _totalMinted() if you want to count just minted tokens.
      */
     function totalSupply() public view returns (uint256) {
@@ -138,11 +124,11 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
             super.supportsInterface(interfaceId);
     }
 
-     /**
+    /**
      * @dev See {IBEP721-balanceOf}.
      */
     function balanceOf(address owner) public view override returns (uint256) {
-        if (owner == address(0)) revert BalanceQueryForZeroAddress();
+        if (owner == address(0)) revert ("Balance Query for zero address");
         return uint256(_addressData[owner].balance);
     }
 
@@ -150,7 +136,6 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * Returns the number of tokens minted by `owner`.
      */
     function _numberMinted(address owner) internal view returns (uint256) {
-        if (owner == address(0)) revert MintedQueryForZeroAddress();
         return uint256(_addressData[owner].numberMinted);
     }
 
@@ -158,7 +143,6 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * Returns the number of tokens burned by or on behalf of `owner`.
      */
     function _numberBurned(address owner) internal view returns (uint256) {
-        if (owner == address(0)) revert BurnedQueryForZeroAddress();
         return uint256(_addressData[owner].numberBurned);
     }
 
@@ -166,7 +150,6 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * Returns the auxillary data for `owner`. (e.g. number of whitelist mint slots used).
      */
     function _getAux(address owner) internal view returns (uint64) {
-        if (owner == address(0)) revert AuxQueryForZeroAddress();
         return _addressData[owner].aux;
     }
 
@@ -175,7 +158,6 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * If there are multiple variables, please pack them into a uint64.
      */
     function _setAux(address owner, uint64 aux) internal {
-        if (owner == address(0)) revert AuxQueryForZeroAddress();
         _addressData[owner].aux = aux;
     }
 
@@ -207,7 +189,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
                 }
             }
         }
-        revert OwnerQueryForNonexistentToken();
+        revert ("Owner Query for nonexistant token");
     }
 
     /**
@@ -235,7 +217,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * @dev See {IBEP721Metadata-tokenURI}.
      */
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        if (!_exists(tokenId)) revert ("URI Query for nonexistant token");
 
         string memory baseURI = _baseURI();
         return bytes(baseURI).length != 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : '';
@@ -251,14 +233,14 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
     }
 
     /**
-     * @dev See {IBEP\721-approve}.
+     * @dev See {IBEP721-approve}.
      */
     function approve(address to, uint256 tokenId) public override {
         address owner = BEP721A.ownerOf(tokenId);
-        if (to == owner) revert ApprovalToCurrentOwner();
+        if (to == owner) revert ("Approval to Current owner");
 
         if (_msgSender() != owner && !isApprovedForAll(owner, _msgSender())) {
-            revert ApprovalCallerNotOwnerNorApproved();
+            revert ("Approval caller not owner nor approved");
         }
 
         _approve(to, tokenId, owner);
@@ -268,7 +250,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * @dev See {IBEP721-getApproved}.
      */
     function getApproved(uint256 tokenId) public view override returns (address) {
-        if (!_exists(tokenId)) revert ApprovalQueryForNonexistentToken();
+        if (!_exists(tokenId)) revert ("Approval query for nonexistant token");
 
         return _tokenApprovals[tokenId];
     }
@@ -277,7 +259,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * @dev See {IBEP721-setApprovalForAll}.
      */
     function setApprovalForAll(address operator, bool approved) public virtual override {
-        if (operator == _msgSender()) revert ApproveToCaller();
+        if (operator == _msgSender()) revert ("Approve to caller");
 
         _operatorApprovals[_msgSender()][operator] = approved;
         emit ApprovalForAll(_msgSender(), operator, approved);
@@ -323,7 +305,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
     ) public virtual override {
         _transfer(from, to, tokenId);
         if (to.isContract() && !_checkContractOnBEP721Received(from, to, tokenId, _data)) {
-            revert TransferToNonBEP721ReceiverImplementer();
+            revert ("Transfer to non BEP721 Receiver implementer");
         }
     }
 
@@ -335,8 +317,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      * Tokens start existing when they are minted (`_mint`),
      */
     function _exists(uint256 tokenId) internal view returns (bool) {
-        return _startTokenId() <= tokenId && tokenId < _currentIndex &&
-            !_ownerships[tokenId].burned;
+        return _startTokenId() <= tokenId && tokenId < _currentIndex && !_ownerships[tokenId].burned;
     }
 
     function _safeMint(address to, uint256 quantity) internal {
@@ -378,8 +359,8 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
         bool safe
     ) internal {
         uint256 startTokenId = _currentIndex;
-        if (to == address(0)) revert MintToZeroAddress();
-        if (quantity == 0) revert MintZeroQuantity();
+        if (to == address(0)) revert ("Mint to zero address");
+        if (quantity == 0) revert ("Minting zero quantity");
 
         _beforeTokenTransfers(address(0), to, startTokenId, quantity);
 
@@ -400,7 +381,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
                 do {
                     emit Transfer(address(0), to, updatedIndex);
                     if (!_checkContractOnBEP721Received(address(0), to, updatedIndex++, _data)) {
-                        revert TransferToNonBEP721ReceiverImplementer();
+                        revert ("Transfer to non BEP721 receiver implementer");
                     }
                 } while (updatedIndex != end);
                 // Reentrancy protection
@@ -432,18 +413,19 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
     ) private {
         TokenOwnership memory prevOwnership = _ownershipOf(tokenId);
 
-        bool isApprovedOrOwner = (_msgSender() == prevOwnership.addr ||
-            isApprovedForAll(prevOwnership.addr, _msgSender()) ||
+        if (prevOwnership.addr != from) revert ("Transfer from incorrect owner");
+
+        bool isApprovedOrOwner = (_msgSender() == from ||
+            isApprovedForAll(from, _msgSender()) ||
             getApproved(tokenId) == _msgSender());
 
-        if (!isApprovedOrOwner) revert TransferCallerNotOwnerNorApproved();
-        if (prevOwnership.addr != from) revert TransferFromIncorrectOwner();
-        if (to == address(0)) revert TransferToZeroAddress();
+        if (!isApprovedOrOwner) revert ("Transfer caller neither owner nor approved");
+        if (to == address(0)) revert ("Transfer to zero address");
 
         _beforeTokenTransfers(from, to, tokenId, 1);
 
         // Clear approvals from the previous owner
-        _approve(address(0), tokenId, prevOwnership.addr);
+        _approve(address(0), tokenId, from);
 
         // Underflow of the sender's balance is impossible because we check for
         // ownership above and the recipient's balance can't realistically overflow.
@@ -452,24 +434,33 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
             _addressData[from].balance -= 1;
             _addressData[to].balance += 1;
 
-            _ownerships[tokenId].addr = to;
-            _ownerships[tokenId].startTimestamp = uint64(block.timestamp);
+            TokenOwnership storage currSlot = _ownerships[tokenId];
+            currSlot.addr = to;
+            currSlot.startTimestamp = uint64(block.timestamp);
 
             // If the ownership slot of tokenId+1 is not explicitly set, that means the transfer initiator owns it.
             // Set the slot of tokenId+1 explicitly in storage to maintain correctness for ownerOf(tokenId+1) calls.
             uint256 nextTokenId = tokenId + 1;
-            if (_ownerships[nextTokenId].addr == address(0)) {
+            TokenOwnership storage nextSlot = _ownerships[nextTokenId];
+            if (nextSlot.addr == address(0)) {
                 // This will suffice for checking _exists(nextTokenId),
                 // as a burned slot cannot contain the zero address.
-                if (nextTokenId < _currentIndex) {
-                    _ownerships[nextTokenId].addr = prevOwnership.addr;
-                    _ownerships[nextTokenId].startTimestamp = prevOwnership.startTimestamp;
+                if (nextTokenId != _currentIndex) {
+                    nextSlot.addr = from;
+                    nextSlot.startTimestamp = prevOwnership.startTimestamp;
                 }
             }
         }
 
         emit Transfer(from, to, tokenId);
         _afterTokenTransfers(from, to, tokenId, 1);
+    }
+
+    /**
+     * @dev This is equivalent to _burn(tokenId, false)
+     */
+    function _burn(uint256 tokenId) internal virtual {
+        _burn(tokenId, false);
     }
 
     /**
@@ -482,41 +473,54 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
      *
      * Emits a {Transfer} event.
      */
-    function _burn(uint256 tokenId) internal virtual {
+    function _burn(uint256 tokenId, bool approvalCheck) internal virtual {
         TokenOwnership memory prevOwnership = _ownershipOf(tokenId);
 
-        _beforeTokenTransfers(prevOwnership.addr, address(0), tokenId, 1);
+        address from = prevOwnership.addr;
+
+        if (approvalCheck) {
+            bool isApprovedOrOwner = (_msgSender() == from ||
+                isApprovedForAll(from, _msgSender()) ||
+                getApproved(tokenId) == _msgSender());
+
+            if (!isApprovedOrOwner) revert ("Transfer caller not owner nor approved");
+        }
+
+        _beforeTokenTransfers(from, address(0), tokenId, 1);
 
         // Clear approvals from the previous owner
-        _approve(address(0), tokenId, prevOwnership.addr);
+        _approve(address(0), tokenId, from);
 
         // Underflow of the sender's balance is impossible because we check for
         // ownership above and the recipient's balance can't realistically overflow.
         // Counter overflow is incredibly unrealistic as tokenId would have to be 2**256.
         unchecked {
-            _addressData[prevOwnership.addr].balance -= 1;
-            _addressData[prevOwnership.addr].numberBurned += 1;
+            AddressData storage addressData = _addressData[from];
+            addressData.balance -= 1;
+            addressData.numberBurned += 1;
 
             // Keep track of who burned the token, and the timestamp of burning.
-            _ownerships[tokenId].addr = prevOwnership.addr;
-            _ownerships[tokenId].startTimestamp = uint64(block.timestamp);
-            _ownerships[tokenId].burned = true;
+            TokenOwnership storage currSlot = _ownerships[tokenId];
+            currSlot.addr = from;
+            currSlot.startTimestamp = uint64(block.timestamp);
+            currSlot.burned = true;
 
             // If the ownership slot of tokenId+1 is not explicitly set, that means the burn initiator owns it.
             // Set the slot of tokenId+1 explicitly in storage to maintain correctness for ownerOf(tokenId+1) calls.
             uint256 nextTokenId = tokenId + 1;
-            if (_ownerships[nextTokenId].addr == address(0)) {
+            TokenOwnership storage nextSlot = _ownerships[nextTokenId];
+            if (nextSlot.addr == address(0)) {
                 // This will suffice for checking _exists(nextTokenId),
                 // as a burned slot cannot contain the zero address.
-                if (nextTokenId < _currentIndex) {
-                    _ownerships[nextTokenId].addr = prevOwnership.addr;
-                    _ownerships[nextTokenId].startTimestamp = prevOwnership.startTimestamp;
+                if (nextTokenId != _currentIndex) {
+                    nextSlot.addr = from;
+                    nextSlot.startTimestamp = prevOwnership.startTimestamp;
                 }
             }
         }
 
-        emit Transfer(prevOwnership.addr, address(0), tokenId);
-        _afterTokenTransfers(prevOwnership.addr, address(0), tokenId, 1);
+        emit Transfer(from, address(0), tokenId);
+        _afterTokenTransfers(from, address(0), tokenId, 1);
 
         // Overflow not possible, as _burnCounter cannot be exceed _currentIndex times.
         unchecked {
@@ -557,7 +561,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
             return retval == IBEP721Receiver(to).onBEP721Received.selector;
         } catch (bytes memory reason) {
             if (reason.length == 0) {
-                revert TransferToNonBEP721ReceiverImplementer();
+                revert ("Transfer to non BEP721 Receiver implementer");
             } else {
                 assembly {
                     revert(add(32, reason), mload(reason))
