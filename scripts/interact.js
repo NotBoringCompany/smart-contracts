@@ -2,22 +2,14 @@ const { ethers } = require("hardhat");
 var fs = require('fs');
 
 async function main() {
-    const deployedContract = '0x53857051B7cB1713f9c44136b274C4F511FFd046';
-    const NBCOpenSeaTestContract = await ethers.getContractFactory("NBCOpenSeaTest");
-    const nbcopenseaTest = await NBCOpenSeaTestContract.attach(deployedContract);
+    const genesisAAddress = '0x31B0A7e9f7EDffbD5214A11693FFd286aDda8D89';
+    const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+    const genesisAContract = await GenesisAContract.attach(genesisAAddress);
 
-    //get token URI for NFT #1
-    // const tokenURI = await nbcopenseaTest.tokenURI(1);
-    // console.log(tokenURI);
+    //check for Token URI
+    const tokenURI = await genesisAContract.tokenURI(1500);
+    console.log(tokenURI);
 
-    //check for owner
-    // const ownerOfToken3 = await nbcopenseaTest.ownerOf(3);
-    // console.log(ownerOfToken3);
-
-    
-    // console.log(await nbcopenseaTest.totalSupply());
-    await nbcopenseaTest.mintTo('0x5fa5c1998d4c11f59c17FDE8b3f07588C23837D5');
-    // console.log(await nbcopenseaTest.totalSupply());
     // let count = 7;
     // for (count; count <= 10; count++) {
         // await nbcopenseaTest.mintTo('0x460107fAB29D57a6926DddC603B7331F4D3bCA05');
@@ -33,6 +25,8 @@ async function main() {
         // })
     //     console.log(count);
     // }
+
+    
 
 }
 

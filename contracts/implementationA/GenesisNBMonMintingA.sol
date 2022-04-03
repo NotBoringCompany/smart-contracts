@@ -9,6 +9,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         // this base URI will only be temporary. it will change during proper deployment.
         setBaseURI("https://marketplace.nbcompany.io/nbmons/genesis/");
         _mintingAllowed = true;
+        mintLimit = 1;
     }
 
     /// @dev Emitted when breeding is set to 'allowed'. Triggered by _owner. 
@@ -19,12 +20,12 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
     bool public _mintingAllowed;
 
     modifier whenMintingAllowed() {
-        require(_mintingAllowed, "NBMonMinting: Minting enabled.");
+        require(_mintingAllowed, "GenesisNBMonMintingA: Minting enabled.");
         _;
     }
 
     modifier whenMintingNotAllowed() {
-        require(!_mintingAllowed, "NBMonMinting: Minting disabled.");
+        require(!_mintingAllowed, "GenesisNBMonMintingA: Minting disabled.");
         _;
     }
 
@@ -38,7 +39,42 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         emit MintingNotAllowed(_msgSender());
     }
 
-    function mintGenesisNBMon(
+    // checks whether a given address is whitelisted to mint a Genesis NBMon
+    mapping (address => bool) whitelisted;
+    // checks how many NBMon eggs the address has minted. if it already reaches the limit, the address cannot mint anymore.
+    mapping (address => uint8) amountMinted;
+
+    // limits the mint amount per person, regardless if whitelisted or not
+    uint8 public mintLimit;
+
+    // admin only function to whitelist an address
+    function whitelistAddress(address _to) public onlyAdmin {
+        whitelisted[_to] = true;
+    }
+
+    function removeWhitelistAddress(address _to) public onlyAdmin {
+        whitelisted[_to] = false;
+    }
+
+    // a modifier for minting to ensure the caller is either whitelisted or the minter
+    modifier isWhitelisted(address _to) {
+        require(whitelisted[_to] == true , "GenesisNBMonMintingA: _to is not whitelisted.");
+        _;
+    }
+    
+    // changes the mint limit
+    function changeMintLimit(uint8 _mintLimit) public onlyAdmin {
+        mintLimit = _mintLimit;
+    }
+
+    // a modifier for minting to ensure that the caller does not mint more than the specified mint limit
+    modifier belowMintLimit(address _to) {
+        require(amountMinted[_to] < mintLimit, "GenesisNBMonMintingA: Mint limit exceeded. Cannot mint more.");
+        _;
+    }
+
+    // mints a genesis egg (for whitelisted people)
+    function whitelistedGenesisEggMint(
         address _owner,
         uint32 _hatchingDuration,
         string[] memory _nbmonStats,
@@ -46,10 +82,26 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         uint8[] memory _potential,
         string[] memory _passives,
         bool _isEgg
-    ) public onlyMinter whenMintingAllowed {
-        _mintGenesisNBMon(_owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
+    ) public onlyMinter isWhitelisted(_owner) belowMintLimit(_owner) whenMintingAllowed {
+        _mintGenesisEgg(_owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
+        amountMinted[_owner]++;
     }
-    function _mintGenesisNBMon(
+
+    // mints a genesis egg (for public)
+    function _publicGenesisEggMint(
+        address _owner,
+        uint32 _hatchingDuration,
+        string[] memory _nbmonStats,
+        string[] memory _types,
+        uint8[] memory _potential,
+        string[] memory _passives,
+        bool _isEgg
+    ) public onlyMinter belowMintLimit(_owner) whenMintingAllowed {
+        _mintGenesisEgg(_owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
+        amountMinted[_owner]++;
+    }
+
+    function _mintGenesisEgg(
         address _owner,
         uint32 _hatchingDuration,
         string[] memory _nbmonStats,
@@ -70,7 +122,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
             _passives,
             _isEgg
         );
-        _safeMint(_owner, currentGenesisNBMonCount);
+        _safeMint(_owner, 1);
         genesisNBMons.push(_genesisNBMon);
         ownerGenesisNBMonIds[_owner].push(currentGenesisNBMonCount);
         emit GenesisNBMonMinted(currentGenesisNBMonCount, _owner);

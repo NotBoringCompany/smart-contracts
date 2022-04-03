@@ -25,11 +25,18 @@ async function main() {
   /**
    * @dev Genesis NBMon Contract
    */
-  const GenesisContract = await ethers.getContractFactory("GenesisNBMonMinting");
-  const genesisContract = await GenesisContract.deploy();
-  await genesisContract.deployed();
-  console.log("Contract address: ", genesisContract.address);
+  // const GenesisContract = await ethers.getContractFactory("GenesisNBMonMinting");
+  // const genesisContract = await GenesisContract.deploy();
+  // await genesisContract.deployed();
+  // console.log("Contract address: ", genesisContract.address);
 
+  /**
+   * @dev Genesis NBMon A (BEP721A) contract
+   */
+   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+   const genesisAContract = await GenesisAContract.deploy();
+   await genesisAContract.deployed();
+   console.log("Contract address: ", genesisAContract.address);
 }
 
 main()

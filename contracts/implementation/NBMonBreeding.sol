@@ -70,8 +70,12 @@ contract NBMonBreeding is NBMonMinting {
 
         // double checking that male parent and female parent have different genders 
         // most likely not required but is added just in case to save gas fees and revert the transaction here if requirement is not met
-        require(keccak256(abi.encodePacked(_maleParent.nbmonStats[0])) == keccak256(abi.encodePacked("male")), "NBMonBreeding: Male parent is not a male gender");
-        require(keccak256(abi.encodePacked(_femaleParent.nbmonStats[0])) == keccak256(abi.encodePacked("female")), "NBMonBreeding: Female parent is not a female gender");
+        require(keccak256(abi.encodePacked(_maleParent.nbmonStats[0])) == keccak256(abi.encodePacked("Male")) 
+                || keccak256(abi.encodePacked(_maleParent.nbmonStats[0])) == keccak256(abi.encodePacked("male")), 
+                "NBMonBreeding: Male parent is not a male gender");
+        require(keccak256(abi.encodePacked(_femaleParent.nbmonStats[0])) == keccak256(abi.encodePacked("Female")) 
+                || keccak256(abi.encodePacked(_femaleParent.nbmonStats[0])) == keccak256(abi.encodePacked("female")), 
+                "NBMonBreeding: Female parent is not a female gender");
 
         require(_maleParent.isEgg == false && _femaleParent.isEgg == false, "NBMonBreeding: Both parents must not be eggs"); 
         // checks if both male and female parents are able to breed. access[1] checks for breedability.
