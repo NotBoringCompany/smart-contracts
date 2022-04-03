@@ -37,6 +37,7 @@ async function main() {
    const genesisAContract = await GenesisAContract.deploy();
    await genesisAContract.deployed();
    console.log("Contract address: ", genesisAContract.address);
+
 }
 
 main()

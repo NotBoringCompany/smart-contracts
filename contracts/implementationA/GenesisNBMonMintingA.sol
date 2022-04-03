@@ -10,6 +10,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         setBaseURI("https://marketplace.nbcompany.io/nbmons/genesis/");
         _mintingAllowed = true;
         mintLimit = 1;
+        supplyLimit = 5000;
     }
 
     /// @dev Emitted when breeding is set to 'allowed'. Triggered by _owner. 
@@ -47,6 +48,9 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
     // limits the mint amount per person, regardless if whitelisted or not
     uint8 public mintLimit;
 
+    // limits the supply of the genesis NBMons. Cannot mint more than this amount ever.
+    uint16 public supplyLimit;
+
     // admin only function to whitelist an address
     function whitelistAddress(address _to) public onlyAdmin {
         whitelisted[_to] = true;
@@ -69,8 +73,13 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
 
     // a modifier for minting to ensure that the caller does not mint more than the specified mint limit
     modifier belowMintLimit(address _to) {
-        require(amountMinted[_to] < mintLimit, "GenesisNBMonMintingA: Mint limit exceeded. Cannot mint more.");
+        require(amountMinted[_to] < mintLimit, "GenesisNBMonMintingA: Mint limit per user exceeded. Cannot mint more.");
         _;
+    }
+
+    // a modifier for minting to ensure that the current supply is less than the allowed supply limit for genesis NBMons
+    modifier belowSupplyLimit() {
+        require(totalSupply() < supplyLimit, "GenesisNBMonMintingA: Supply limit reached. Cannot mint more.");
     }
 
     // mints a genesis egg (for whitelisted people)
@@ -82,7 +91,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         uint8[] memory _potential,
         string[] memory _passives,
         bool _isEgg
-    ) public onlyMinter isWhitelisted(_owner) belowMintLimit(_owner) whenMintingAllowed {
+    ) public onlyMinter isWhitelisted(_owner) belowMintLimit(_owner) belowSupplyLimit whenMintingAllowed {
         _mintGenesisEgg(_owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
         amountMinted[_owner]++;
     }
@@ -96,7 +105,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         uint8[] memory _potential,
         string[] memory _passives,
         bool _isEgg
-    ) public onlyMinter belowMintLimit(_owner) whenMintingAllowed {
+    ) public onlyMinter belowMintLimit(_owner) belowSupplyLimit whenMintingAllowed {
         _mintGenesisEgg(_owner, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
         amountMinted[_owner]++;
     }
