@@ -3,12 +3,15 @@
 pragma solidity ^0.8.6;
 
 import "./GenesisNBMonCoreA.sol";
+import "../security/ReentrancyGuard.sol";
 
-contract GenesisNBMonMintingA is GenesisNBMonCoreA {
+contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
     constructor() BEP721A("Genesis NBMon", "G-NBMON") {
         // this base URI will only be temporary. it will change during proper deployment.
         setBaseURI("https://marketplace.nbcompany.io/nbmons/genesis/");
         _mintingAllowed = true;
+        // 0.15 ETH
+        mintingPrice = 0.15 * 10 ** 18;
         mintLimit = 1;
         //total = 5000
         devMintLimit = 350;
@@ -48,6 +51,8 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
     // checks how many NBMon eggs the address has minted. if it already reaches the limit, the address cannot mint anymore.
     mapping (address => uint16) public amountMinted;
 
+    // sets the minting price for each Genesis Egg (in wei)
+    uint256 public mintingPrice; 
     // limits the mint amount per person, regardless if whitelisted or not
     uint16 public mintLimit;
     // limits the amount the dev is able to mint.
@@ -71,6 +76,11 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
     modifier isWhitelisted(address _to) {
         require(whitelisted[_to] == true , "GenesisNBMonMintingA: _to is not whitelisted.");
         _;
+    }
+
+    // changes the minting price
+    function changeMintingPrice(uint256 _mintingPrice) public onlyAdmin {
+        mintingPrice = _mintingPrice;
     }
     
     // changes the mint limit
@@ -134,7 +144,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         amountMinted[_msgSender()] += _amountToMint;
     }
 
-    // mints a genesis egg (for whitelisted people)
+    // mints a genesis egg (for whitelisted people.
     function whitelistedGenesisEggMint(
         address _owner,
         uint16 _amountToMint,
@@ -143,8 +153,8 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         string[] memory _types,
         uint8[] memory _potential,
         string[] memory _passives,
-        bool _isEgg
-    ) public onlyMinter isWhitelisted(_owner) belowMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
+        bool _isEgg 
+    ) public nonReentrant onlyMinter isWhitelisted(_owner) belowMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
         _mintGenesisEgg(_owner, _amountToMint, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
         amountMinted[_owner]++;
     }
@@ -159,7 +169,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         uint8[] memory _potential,
         string[] memory _passives,
         bool _isEgg
-    ) public onlyMinter belowMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
+    ) public nonReentrant onlyMinter belowMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
         _mintGenesisEgg(_owner, _amountToMint, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
         amountMinted[_owner]++;
     }
@@ -174,23 +184,26 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         string[] memory _passives,
         bool _isEgg
     ) private {
-        GenesisNBMon memory _genesisNBMon = GenesisNBMon(
-            currentGenesisNBMonCount,
-            _owner,
-            block.timestamp,
-            block.timestamp,
-            _hatchingDuration,
-            _nbmonStats,
-            _types,
-            _potential,
-            _passives,
-            _isEgg
-        );
-        _safeMint(_owner, _amountToMint);
-        genesisNBMons.push(_genesisNBMon);
-        ownerGenesisNBMonIds[_owner].push(currentGenesisNBMonCount);
-        emit GenesisNBMonMinted(currentGenesisNBMonCount, _owner);
-        currentGenesisNBMonCount++;
+            uint i = currentGenesisNBMonCount;
+            for (i; i < (currentGenesisNBMonCount + _amountToMint); i++) {
+                GenesisNBMon memory _genesisNBMon = GenesisNBMon(
+                i,
+                _owner,
+                block.timestamp,
+                block.timestamp,
+                _hatchingDuration,
+                _nbmonStats,
+                _types,
+                _potential,
+                _passives,
+                _isEgg
+            );
+                genesisNBMons.push(_genesisNBMon);
+                ownerGenesisNBMonIds[_owner].push(i);
+                emit GenesisNBMonMinted(i, _owner);
+            }
+            _safeMint(_owner, _amountToMint);
+            currentGenesisNBMonCount += _amountToMint;
     }
 
     function hatchFromEgg(
@@ -214,5 +227,10 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA {
         _genesisNBMon.potential = _potential;
         _genesisNBMon.passives = _passives;
         _genesisNBMon.isEgg = false;
+    }
+
+    // withdraw funds to _to's wallet
+    function withdrawFunds(address _to) public onlyAdmin {
+        payable(_to).transfer(address(this).balance);
     }
 }

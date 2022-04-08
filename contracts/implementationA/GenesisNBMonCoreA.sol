@@ -36,7 +36,7 @@ abstract contract GenesisNBMonCoreA is NFTCoreA {
     mapping(address => uint256[]) internal ownerGenesisNBMonIds;
     
     // checks the current genesis NBMon supply for enumeration. Starts at 1 when contract is deployed.
-    uint256 internal currentGenesisNBMonCount = 1;
+    uint256 public currentGenesisNBMonCount = 1;
 
     // function to change currentGenesisNBMonCount. 
     // NOT advised. refrain from using this unless really necessary.
