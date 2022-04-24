@@ -289,6 +289,9 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
         _genesisNBMon.potential = _hatchingStats.potential;
         _genesisNBMon.passives = _hatchingStats.passives;
         _genesisNBMon.isEgg = false;
+
+        // removes the key from being a valid key after hatching
+        removeValidKey(_key);
     }
 
     // withdraw funds to _to's wallet

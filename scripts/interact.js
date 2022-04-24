@@ -4,13 +4,16 @@ require('dotenv').config();
 // var fs = require('fs');
 
 async function main() {
-  const genesisAAddress = '0xf113759799E2616B662F63c1cbB3821E0cb9Dddb';
+  const genesisAAddress = '0x8E8Dd701de2F6cc5da7E5F6d6bd88E650cabb44B';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
   const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
   const moralisAPINode = process.env.MORALIS_NODEAPI;
   const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
   const customHttpProvider = new ethers.providers.JsonRpcProvider(nodeURL);
+
+  const checkKey = await genesisAContract.checkValidKey("18a16a60-8f64-4e72-ab76-76ffc1c90969");
+  console.log(checkKey);
 
   // const txHash = "0x415d35912236e643e69118e3ce396945b7409ae807f925eecb2c69fdccb599a0";
 
@@ -33,14 +36,14 @@ async function main() {
   // let owner = "0xe253773Fdd10B4Bd9d7567e37003F7029144EF90";
   // let amountToMint = 1;
   // let hatchingDuration = 300;
-  let nbmonStats = ["Male", "Common", "Fire", "Origin", "Lamox", "3000"];
-  let types = ["Electric", "Spirit"];
-  let potential = [26, 10, 2, 14, 2, 19];
-  let passives = ["Electric Sword", "Test Lol"];
-  // let isEgg = true;
+  // let nbmonStats = ["Male", "Common", "Fire", "Origin", "Lamox", "3000"];
+  // let types = ["Electric", "Spirit"];
+  // let potential = [26, 10, 2, 14, 2, 19];
+  // let passives = ["Electric Sword", "Test Lol"];
+  // // let isEgg = true;
 
-  const hatchEgg = await genesisAContract.hatchFromEgg(102, nbmonStats, types, potential, passives);
-  console.log(hatchEgg);
+  // const hatchEgg = await genesisAContract.hatchFromEgg(102, nbmonStats, types, potential, passives);
+  // console.log(hatchEgg);
 
   // const devMint = await genesisAContract.devGenesisEggMint(amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(devMint);
