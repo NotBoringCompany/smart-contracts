@@ -106,8 +106,11 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
             isValidKey[_key] = HatchingStats(true, _nbmonStats, _types, _potential, _passives);
     }
 
-    /// removes a valid key once egg is hatched. will not fully delete, only will empty stats.
+    /// removes a valid key once egg is hatched. will not fully delete, will only empty stats.
     function removeValidKey(string memory _key) public onlyAdmin {
+        delete isValidKey[_key];
+    }
+    function removeValidKeyPvt(string memory _key) private {
         delete isValidKey[_key];
     }
 
@@ -271,7 +274,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
             currentGenesisNBMonCount += _amountToMint;
     }
 
-    function hatchFromEgg(string memory _key, uint256 _nbmonId) public {
+    function hatchFromEgg(string memory _key, uint256 _nbmonId) public nonReentrant whenHatchingAllowed {
         require(isValidKey[_key].exists == true, "GenesisNBMonMintingA: Specified key is not valid.");
 
         HatchingStats memory _hatchingStats = isValidKey[_key];
@@ -291,7 +294,7 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
         _genesisNBMon.isEgg = false;
 
         // removes the key from being a valid key after hatching
-        removeValidKey(_key);
+        removeValidKeyPvt(_key);
     }
 
     // withdraw funds to _to's wallet

@@ -4,7 +4,7 @@ require('dotenv').config();
 // var fs = require('fs');
 
 async function main() {
-  const genesisAAddress = '0x8E8Dd701de2F6cc5da7E5F6d6bd88E650cabb44B';
+  const genesisAAddress = '0xB33deC2f4071AA364d59e507865148E12af6b1cD';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
   const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
@@ -12,8 +12,8 @@ async function main() {
   const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
   const customHttpProvider = new ethers.providers.JsonRpcProvider(nodeURL);
 
-  const checkKey = await genesisAContract.checkValidKey("18a16a60-8f64-4e72-ab76-76ffc1c90969");
-  console.log(checkKey);
+  // const checkKey = await genesisAContract.checkValidKey("20595b62-a42f-45ba-a8fe-c517faa3a1c7");
+  // console.log(checkKey);
 
   // const txHash = "0x415d35912236e643e69118e3ce396945b7409ae807f925eecb2c69fdccb599a0";
 
@@ -35,26 +35,29 @@ async function main() {
   // name = NBC Experiment 1
   // let owner = "0xe253773Fdd10B4Bd9d7567e37003F7029144EF90";
   // let amountToMint = 1;
-  // let hatchingDuration = 300;
-  // let nbmonStats = ["Male", "Common", "Fire", "Origin", "Lamox", "3000"];
-  // let types = ["Electric", "Spirit"];
-  // let potential = [26, 10, 2, 14, 2, 19];
-  // let passives = ["Electric Sword", "Test Lol"];
-  // // let isEgg = true;
+  // let hatchingDuration = 5;
+  // let nbmonStats = [];
+  // let types = [];
+  // let potential = [];
+  // let passives = [];
+  // let isEgg = true;
 
-  // const hatchEgg = await genesisAContract.hatchFromEgg(102, nbmonStats, types, potential, passives);
-  // console.log(hatchEgg);
+  // const publicMint = await genesisAContract.publicGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
+  // console.log(publicMint);
+
+  const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
+  console.log(hatchEgg);
 
   // const devMint = await genesisAContract.devGenesisEggMint(amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(devMint);
 
-  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x460107fAB29D57a6926DddC603B7331F4D3bCA05');
+  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0xda6FCd7aF0E44E5d301dF3e7720a5281BBECCb2A');
   // console.log(ownerIds);
 
   // const currentCount = await genesisAContract.currentGenesisNBMonCount();
   // console.log(currentCount);
 
-  // const ownerNBMons = await genesisAContract.getGenesisNBMon(15);
+  // const ownerNBMons = await genesisAContract.getGenesisNBMon(10);
   // console.log(ownerNBMons);
 
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);

@@ -24,27 +24,27 @@ abstract contract AccessControl is Context {
     }
 
     modifier onlyAdmin() {
-        require(_msgSender() == admin);
+        require(_msgSender() == admin, "AccessControl: Caller is not admin");
         _;
     }
 
     modifier onlyMinter() {
-        require(_msgSender() == minter);
+        require(_msgSender() == minter, "AccessControl: Caller is not minter");
         _;
     }
 
     modifier onlyBurner() {
-        require(_msgSender() == burner);
+        require(_msgSender() == burner, "AccessControl: Caller is not burner");
         _;
     }
 
     modifier onlyCEO() {
-        require(_msgSender() == ceo);
+        require(_msgSender() == ceo, "AccessControl: Caller is not CEO");
         _;
     }
 
     modifier onlyManager() {
-        require(_msgSender() == manager);
+        require(_msgSender() == manager, "AccessControl: Caller is not manager");
         _;
     }
 
@@ -52,7 +52,7 @@ abstract contract AccessControl is Context {
         require(
             _msgSender() == admin || 
             _msgSender() == ceo
-        );
+        , "AccessControl: Caller is not admin or CEO");
         _;
     }
 
@@ -63,7 +63,7 @@ abstract contract AccessControl is Context {
             _msgSender() == burner ||
             _msgSender() == ceo || 
             _msgSender() == manager
-        );
+        , "AccessControl: Caller is not admin, minter, burner, CEO or manager.");
         _;
     }
 
