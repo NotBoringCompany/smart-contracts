@@ -4,7 +4,7 @@ require('dotenv').config();
 // var fs = require('fs');
 
 async function main() {
-  const genesisAAddress = '0xB33deC2f4071AA364d59e507865148E12af6b1cD';
+  const genesisAAddress = '0x198dA629BEAbca69AE6D1E3b595F2A1776b01c3B';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
   const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
@@ -12,8 +12,11 @@ async function main() {
   const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
   const customHttpProvider = new ethers.providers.JsonRpcProvider(nodeURL);
 
-  // const checkKey = await genesisAContract.checkValidKey("20595b62-a42f-45ba-a8fe-c517faa3a1c7");
+  // const checkKey = await genesisAContract.checkValidKey("0225ca3a-4a08-48f6-a799-33ff583b6f4d");
   // console.log(checkKey);
+
+  // const changeURI = await genesisAContract.setBaseURI("https://nbcompany.fra1.digitaloceanspaces.com/genesisNBMon/");
+  // console.log(changeURI);
 
   // const txHash = "0x415d35912236e643e69118e3ce396945b7409ae807f925eecb2c69fdccb599a0";
 
@@ -34,25 +37,28 @@ async function main() {
 
   // name = NBC Experiment 1
   // let owner = "0xe253773Fdd10B4Bd9d7567e37003F7029144EF90";
-  // let amountToMint = 1;
-  // let hatchingDuration = 5;
+  // let amountToMint = 10;
+  // let hatchingDuration = 30;
   // let nbmonStats = [];
   // let types = [];
   // let potential = [];
   // let passives = [];
   // let isEgg = true;
 
-  // const publicMint = await genesisAContract.publicGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
-  // console.log(publicMint);
-
-  const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
-  console.log(hatchEgg);
-
   // const devMint = await genesisAContract.devGenesisEggMint(amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(devMint);
 
-  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0xda6FCd7aF0E44E5d301dF3e7720a5281BBECCb2A');
+  // const publicMint = await genesisAContract.publicGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
+  // console.log(publicMint);
+
+  // const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
+  // console.log(hatchEgg);
+
+  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x00F33E569F0d7023FE5a8aE71E09D82514DD8833');
   // console.log(ownerIds);
+
+  const tokenURI = await genesisAContract.tokenURI(1);
+  console.log(tokenURI);
 
   // const currentCount = await genesisAContract.currentGenesisNBMonCount();
   // console.log(currentCount);
@@ -71,7 +77,7 @@ async function main() {
   // const amountMinted = await genesisAContract.amountMinted('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
   // console.log(amountMinted);
 
-  // const checkId = await genesisAContract.getGenesisNBMon(101);
+  // const checkId = await genesisAContract.getGenesisNBMon(1);
   // console.log(checkId);
 
   

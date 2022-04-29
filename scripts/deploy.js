@@ -3,15 +3,16 @@ const { ethers } = require("hardhat");
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with the account: ", deployer.address);
-  console.log("Account balance: ", deployer.getBalance().toString, " wei");
+  const balance = await deployer.getBalance();
+  console.log("Account balance: ", balance.toString(), " wei");
 
   /**
    * @dev NBMon contract
    */
-  //     const NBMonContract = await ethers.getContractFactory("NBMonBreeding");
-  //     const nbmonContract = await NBMonContract.deploy();
-  //     await nbmonContract.deployed();
-  //     console.log("Contract address: ", nbmonContract.address);
+      // const NBMonContract = await ethers.getContractFactory("NBMonBreeding");
+      // const nbmonContract = await NBMonContract.deploy();
+      // await nbmonContract.deployed();
+      // console.log("Contract address: ", nbmonContract.address);
 
   /**
    * @dev Test OpenSea Contract
@@ -33,8 +34,10 @@ async function main() {
   /**
    * @dev Genesis NBMon A (BEP721A) contract
    */
-   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
-   const genesisAContract = await GenesisAContract.deploy();
+   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA").catch((err) => console.log(err));
+   console.log("genesis contract factory received");
+   const genesisAContract = await GenesisAContract.deploy().catch((err) => console.log(err));
+   console.log("genesis contract being deployed");
    await genesisAContract.deployed();
    console.log("Contract address: ", genesisAContract.address);
 

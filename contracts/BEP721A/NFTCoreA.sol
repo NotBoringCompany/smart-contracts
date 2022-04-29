@@ -21,11 +21,8 @@ abstract contract NFTCoreA is BEP721AURIStorage {
         baseTokenURI = newBaseURI;
     }
 
-    /**
-     * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
-     */
-    function tokenURI(uint256 tokenId) public view virtual override(BEP721AURIStorage) returns (string memory) {
-        return BEP721AURIStorage.tokenURI(tokenId);
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        return string(abi.encodePacked(super.tokenURI(tokenId), ".json"));
     }
 
     /**

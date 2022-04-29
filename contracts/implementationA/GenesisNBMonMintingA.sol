@@ -8,7 +8,7 @@ import "../security/ReentrancyGuard.sol";
 contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
     constructor() BEP721A("Genesis NBMon", "G-NBMON") {
         // this base URI will only be temporary. it will change during proper deployment.
-        setBaseURI("https://marketplace.nbcompany.io/nbmons/genesis/");
+        setBaseURI("https://nbcompany.fra1.digitaloceanspaces.com/genesisNBMon/");
         _mintingAllowed = true;
         _hatchingAllowed = true;
         // 0.15 ETH
@@ -265,7 +265,8 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
                 _potential,
                 _passives,
                 _isEgg
-            );
+                );
+
                 genesisNBMons.push(_genesisNBMon);
                 ownerGenesisNBMonIds[_owner].push(i);
                 emit GenesisNBMonMinted(i, _owner);

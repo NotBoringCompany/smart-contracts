@@ -28,7 +28,7 @@ abstract contract BEP721AURIStorage is BEP721A {
         }
         // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
         if (bytes(_tokenURI).length > 0) {
-            return string(abi.encodePacked(base, _tokenURI, ".json"));
+            return string(abi.encodePacked(base, _tokenURI));
         }
 
         return super.tokenURI(tokenId);
