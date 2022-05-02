@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Creator: Chiru Labs
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.13;
 
 import "../BEP721/IBEP721.sol";
 import "../BEP721/IBEP721Receiver.sol";
@@ -11,20 +11,6 @@ import "../security/Context.sol";
 import "../BEP165/BEP165.sol";
 import "../security/Strings.sol";
 import "../security/Pausable.sol";
-
-// error ApprovalCallerNotOwnerNorApproved();
-// error ApprovalQueryForNonexistentToken();
-// error ApproveToCaller();
-// error ApprovalToCurrentOwner();
-// error BalanceQueryForZeroAddress();
-// error MintToZeroAddress();
-// error MintZeroQuantity();
-// error OwnerQueryForNonexistentToken();
-// error TransferCallerNotOwnerNorApproved();
-// error TransferFromIncorrectOwner();
-// error TransferToNonBEP721ReceiverImplementer();
-// error TransferToZeroAddress();
-// error URIQueryForNonexistentToken();
 
 contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
     using Address for address;
