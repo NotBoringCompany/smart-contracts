@@ -18,7 +18,6 @@ contract RealmCoin is BEP20("Realm Coin", "REC") {
         require(totalSupply() + _amount <= cap, "BEP20: Cap reached. Cannot mint");
         _mint(_to, _amount);
         
-        
         return true;
     }
     function burn(address _from, uint256 _amount) public onlyBurner whenNotPaused returns (bool) {
