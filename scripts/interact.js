@@ -4,7 +4,7 @@ require('dotenv').config();
 // var fs = require('fs');
 
 async function main() {
-  const genesisAAddress = '0x198dA629BEAbca69AE6D1E3b595F2A1776b01c3B';
+  const genesisAAddress = '0xD60aBE82b71CB19a4Eb2a534b39C306583D6E11C';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
   const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
@@ -15,7 +15,7 @@ async function main() {
   // const checkKey = await genesisAContract.checkValidKey("0225ca3a-4a08-48f6-a799-33ff583b6f4d");
   // console.log(checkKey);
 
-  // const changeURI = await genesisAContract.setBaseURI("https://nbcompany.fra1.digitaloceanspaces.com/genesisNBMon/");
+  // const changeURI = await genesisAContract.setBaseURI("https://lol.com/");
   // console.log(changeURI);
 
   // const txHash = "0x415d35912236e643e69118e3ce396945b7409ae807f925eecb2c69fdccb599a0";
@@ -60,7 +60,7 @@ async function main() {
   const tokenURI = await genesisAContract.tokenURI(1);
   console.log(tokenURI);
 
-  // const currentCount = await genesisAContract.currentGenesisNBMonCount();
+  // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
 
   // const ownerNBMons = await genesisAContract.getGenesisNBMon(10);
