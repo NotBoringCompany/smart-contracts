@@ -13,7 +13,8 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
         _hatchingAllowed = true;
         // 0.15 ETH
         mintingPrice = 0.15 * 10 ** 18;
-        mintLimit = 1;
+        mintLimit = 5;
+        whitelistedMintLimit = 1;
         //total = 5000
         devMintLimit = 350;
         publicSupplyLimit = 5000;
@@ -118,11 +119,15 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
     mapping (address => bool) public whitelisted;
     // checks how many NBMon eggs the address has minted. if it already reaches the limit, the address cannot mint anymore.
     mapping (address => uint16) public amountMinted;
+    // if an address is whitelisted, this will show the amount that they have minted.
+    mapping (address => uint8) public whitelistedAmountMinted;
 
     // sets the minting price for each Genesis Egg (in wei)
     uint256 public mintingPrice; 
     // limits the mint amount per person, regardless if whitelisted or not
     uint16 public mintLimit;
+    // limits the mint amount per whitelisted person
+    uint8 public whitelistedMintLimit;
     // limits the amount the dev is able to mint.
     uint16 public devMintLimit;
 
@@ -160,6 +165,13 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
     modifier belowMintLimit(uint16 _amountToMint, address _to) {
         uint16 _totalToMint = amountMinted[_to] + _amountToMint;
         require(_totalToMint <= mintLimit, "GenesisNBMonMintingA: Mint limit per user exceeded.");
+        _;
+    }
+
+    // a modifier for minting to ensure that the whitelisted caller does not mint more than the specified whitelisted mint limit
+    modifier belowWhitelistedMintLimit(uint16 _amountToMint, address _to) {
+        uint16 _totalToMint = whitelistedAmountMinted[_to] + _amountToMint;
+        require(_totalToMint <= whitelistedMintLimit, "GenesisNBMonMintingA: Whitelisted mint limit per user exceeded.");
         _;
     }
 
@@ -222,9 +234,10 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
         uint8[] memory _potential,
         string[] memory _passives,
         bool _isEgg 
-    ) public nonReentrant onlyMinter isWhitelisted(_owner) belowMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
+    ) public nonReentrant onlyMinter isWhitelisted(_owner) belowWhitelistedMintLimit(_amountToMint, _owner) belowPublicSupplyLimit(_amountToMint) whenMintingAllowed {
         _mintGenesisEgg(_owner, _amountToMint, _hatchingDuration, _nbmonStats, _types, _potential, _passives, _isEgg);
         amountMinted[_owner]++;
+        whitelistedAmountMinted[_owner]++;
     }
 
     // mints a genesis egg (for public)
