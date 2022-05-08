@@ -4,13 +4,16 @@ require('dotenv').config();
 // var fs = require('fs');
 
 async function main() {
-  const genesisAAddress = '0xD60aBE82b71CB19a4Eb2a534b39C306583D6E11C';
+  const genesisAAddress = '0xc23f1BC9Ad2682A8659EA67c3b54BbB259FB5C38';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
   const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
   const moralisAPINode = process.env.MORALIS_NODEAPI;
   const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
   const customHttpProvider = new ethers.providers.JsonRpcProvider(nodeURL);
+
+  const txCount = await customHttpProvider.getTransactionCount('0x460107fAB29D57a6926DddC603B7331F4D3bCA05');
+  console.log(txCount);
 
   // const checkKey = await genesisAContract.checkValidKey("0225ca3a-4a08-48f6-a799-33ff583b6f4d");
   // console.log(checkKey);
@@ -57,8 +60,8 @@ async function main() {
   // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x00F33E569F0d7023FE5a8aE71E09D82514DD8833');
   // console.log(ownerIds);
 
-  const tokenURI = await genesisAContract.tokenURI(1);
-  console.log(tokenURI);
+  // const tokenURI = await genesisAContract.tokenURI(1);
+  // console.log(tokenURI);
 
   // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
@@ -69,7 +72,7 @@ async function main() {
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(mintWhitelist);
 
-  // const whitelistAddress = await genesisAContract.whitelistAddress('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
+  // const whitelistAddress = await genesisAContract.whitelistAddress('0xa1BD4289940ed38100d9B93Bf4cBdf6E7de0689D');
   // console.log(whitelistAddress);
   // const checkWhitelist = await genesisAContract.whitelisted('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
   // console.log(checkWhitelist);
