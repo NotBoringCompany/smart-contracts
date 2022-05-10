@@ -7,9 +7,10 @@ import "../security/Pausable.sol";
 import "../security/EDCSA.sol";
 import "../security/ReentrancyGuard.sol";
 import "../BEP20/BEP20.sol";
+import "../BEP20/SafeBEP20.sol";
 
 contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
-
+    using SafeBEP20 for BEP20;
     /**
      * @dev contains three types of sales.
      * 1. fixed price (price is fixed for the entire duration of the sale)
@@ -25,6 +26,14 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         TimedAuction,
         BidAuction
     }
+
+    event Sold(
+        /// _nftContract, _paymentToken, _seller, _buyer 
+        address[] indexed _addresses,
+        /// _tokenId, _soldFor
+        uint256[] indexed _values,
+        SaleType _saleType
+    );
 
     /**
      * @dev Generates a hash when listing with the given parameters.
@@ -114,10 +123,59 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         /// value to be transferred to the seller after successful purchase
         uint256 _sellerCut = _values[1] - _salesFee - _devCut;
 
-        _paymentToken.safeTransferFrom(
-            _msgSender(),
-            addresses[]
-        )
+        /// transfers _sellerCut from buyer to seller (i.e. buyer pays the seller)
+        _paymentToken.safeTransferFrom(_msgSender(),_addresses[2],_sellerCut);
+
+        /// omits signature from being able to be used in the future
+        usedSignatures[_signature] == true;
+
+
+        /// used for events
+        address[] memory addresses_ = new address[](4);
+        addresses_[0] = _addresses[0];
+        addresses_[1] = _addresses[1];
+        addresses_[2] = _addresses[2];
+        addresses_[3] = _addresses[3];
+
+        uint256[] memory values_ = new uint256[](2);
+        values_[0] = _values[0];
+        values_[1] = _values[1];
+
+        emit Sold(
+            addresses_,
+            values_,
+            _saleType
+        );
+        return true;
+    }
+
+    function ignoreSignature(
+        /// _nftContract, _paymentToken, _seller, _buyer
+        address[4] calldata _addresses,
+        /// _tokenId, _soldFor, _txSalt
+        uint256[3] calldata _values,
+        SaleType _saleType,
+        bytes calldata _signature
+    ) public {
+        bytes32 _hash = listingHash(
+            _addresses[0],
+            _values[0],
+            _addresses[1],
+            _saleType,
+            _addresses[2],
+            _addresses[3],
+            _values[1],
+            _values[2]
+        );
+
+        bytes32 _ethSignedMsgHash = ECDSA.toEthSignedMessageHash(_hash);
+
+        require(
+            ECDSA.recover(_ethSignedMsgHash, _signature) == _msgSender(), 
+            "NBMarketplaceV2: Invalid seller signature."
+        );
+
+        usedSignatures[_signature] = true;
     }
 }
 
