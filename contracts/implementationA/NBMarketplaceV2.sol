@@ -44,9 +44,8 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         address _paymentToken,
         SaleType _saleType,
         address _seller,
-        address _buyer,
-        uint256 _soldFor,
-        uint256 _txSalt
+        uint256 _price,
+        string memory _txSalt
     ) public pure returns (bytes32) {
         return 
             keccak256(
@@ -56,8 +55,7 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
                     _paymentToken,
                     _saleType,
                     _seller,
-                    _buyer,
-                    _soldFor,
+                    _price,
                     _txSalt
                 )
             );
@@ -66,8 +64,9 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
     function atomicMatch(
         /// _nftContract, _paymentToken, _seller, _buyer
         address[4] calldata _addresses,
-        /// _tokenId, _soldFor, _txSalt
-        uint256[3] calldata _values,
+        /// _tokenId, _soldFor,
+        uint256[2] calldata _values,
+        string memory _txSalt,
         SaleType _saleType,
         bytes calldata _signature
     ) public nonReentrant returns (bool) {
@@ -83,9 +82,8 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
             _addresses[1],
             _saleType,
             _addresses[2],
-            _addresses[3],
             _values[1],
-            _values[2]
+            _txSalt
         );
 
         /// gets the ethereum signed message
@@ -129,6 +127,18 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         /// omits signature from being able to be used in the future
         usedSignatures[_signature] == true;
 
+        /// transfers _salesFee if not 0
+        if (_salesFee > 0) {
+            _paymentToken.safeTransferFrom(_msgSender(), nbExchequer, _salesFee);
+        }
+
+        /// transfers _devCut if not 0
+        if (_devCut > 0) {
+            _paymentToken.safeTransferFrom(_msgSender(), admin, _devCut);
+        }
+
+        /// transfers _nft from seller to buyer
+        _nft.safeTransferFrom(_addresses[2], _msgSender(), _values[0]);
 
         /// used for events
         address[] memory addresses_ = new address[](4);
@@ -141,6 +151,8 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         values_[0] = _values[0];
         values_[1] = _values[1];
 
+
+
         emit Sold(
             addresses_,
             values_,
@@ -152,8 +164,9 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
     function ignoreSignature(
         /// _nftContract, _paymentToken, _seller, _buyer
         address[4] calldata _addresses,
-        /// _tokenId, _soldFor, _txSalt
-        uint256[3] calldata _values,
+        /// _tokenId, _soldFor
+        uint256[2] calldata _values,
+        string memory _txSalt,
         SaleType _saleType,
         bytes calldata _signature
     ) public {
@@ -163,9 +176,8 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
             _addresses[1],
             _saleType,
             _addresses[2],
-            _addresses[3],
             _values[1],
-            _values[2]
+            _txSalt
         );
 
         bytes32 _ethSignedMsgHash = ECDSA.toEthSignedMessageHash(_hash);

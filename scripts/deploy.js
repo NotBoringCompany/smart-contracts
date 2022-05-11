@@ -15,15 +15,6 @@ async function main() {
       // console.log("Contract address: ", nbmonContract.address);
 
   /**
-   * @dev Test OpenSea Contract
-   */
-
-  // const OpenSeaTestContract = await ethers.getContractFactory("NBCOpenSeaTest");
-  // const openseaTestContract = await OpenSeaTestContract.deploy();
-  // await openseaTestContract.deployed();
-  // console.log("Contract address: ", openseaTestContract.address);
-
-  /**
    * @dev Genesis NBMon Contract
    */
   // const GenesisContract = await ethers.getContractFactory("GenesisNBMonMinting");

@@ -4,16 +4,26 @@ require('dotenv').config();
 // var fs = require('fs');
 
 async function main() {
-  const genesisAAddress = '0xc23f1BC9Ad2682A8659EA67c3b54BbB259FB5C38';
-  const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
-  const genesisAContract = await GenesisAContract.attach(genesisAAddress);
-  
-  const moralisAPINode = process.env.MORALIS_NODEAPI;
-  const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
-  const customHttpProvider = new ethers.providers.JsonRpcProvider(nodeURL);
 
-  const txCount = await customHttpProvider.getTransactionCount('0x460107fAB29D57a6926DddC603B7331F4D3bCA05');
-  console.log(txCount);
+  const marketplace = '0x7E04fbd7DcD2B2C188D8d9f5401CF89Cd011ED7f';
+  const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
+  const marketplaceContract = await MarketplaceContract.attach(marketplace);
+
+  // const setSalesFee = await marketplaceContract.setSalesFee(400);
+  // console.log(setSalesFee);
+
+  const checkSalesFee = await marketplaceContract.salesFee();
+  console.log(checkSalesFee);
+  // const genesisAAddress = '0xc23f1BC9Ad2682A8659EA67c3b54BbB259FB5C38';
+  // const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+  // const genesisAContract = await GenesisAContract.attach(genesisAAddress);
+  
+  // const moralisAPINode = process.env.MORALIS_NODEAPI;
+  // const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
+  // const customHttpProvider = new ethers.providers.JsonRpcProvider(nodeURL);
+
+  // const txCount = await customHttpProvider.getTransactionCount('0x460107fAB29D57a6926DddC603B7331F4D3bCA05');
+  // console.log(txCount);
 
   // const checkKey = await genesisAContract.checkValidKey("0225ca3a-4a08-48f6-a799-33ff583b6f4d");
   // console.log(checkKey);
