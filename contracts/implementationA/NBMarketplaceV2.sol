@@ -27,6 +27,22 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         BidAuction
     }
 
+    enum SigError {
+        InvalidSellerSig,
+        UsedSig,
+        NoErr
+    }
+
+    function _throwSigError(SigError error) private pure {
+        if (error == SigError.NoErr) {
+            return;
+        } else if (error == SigError.InvalidSellerSig) {
+            revert("NBMarketplaceV2: Invalid seller signature.");
+        } else if (error == SigError.UsedSig) {
+            revert("NBMarketplaceV2: Signature already used.");
+        }
+    }
+
     event Sold(
         /// _nftContract, _paymentToken, _seller, _buyer 
         address[] indexed _addresses,
@@ -72,28 +88,8 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
     ) public nonReentrant returns (bool) {
         /// check if payment token specified is allowed
         require(paymentTokens[_addresses[1]] == true, "NBMarketplaceV2: Token not accepted for payment.");
-        /// check if signature is valid
-        require(!usedSignatures[_signature], "NBMarketplaceV2: Signature already used.");
-
-        /// gets the message hash from the specified parameters
-        bytes32 _hash = listingHash(
-            _addresses[0],
-            _values[0],
-            _addresses[1],
-            _saleType,
-            _addresses[2],
-            _values[1],
-            _txSalt
-        );
-
-        /// gets the ethereum signed message
-        bytes32 _ethSignedMsgHash = ECDSA.toEthSignedMessageHash(_hash);
-
-        ///checks if the recovered address matches the seller's address
-        require(
-            ECDSA.recover(_ethSignedMsgHash, _signature) == _addresses[2],
-            "NBMarketplaceV2: Invalid seller signature."
-        );
+    
+        sigMatch(_addresses, _values, _txSalt, _saleType, _signature);
 
         /// checks for NFT ownership
         BEP721A _nft = BEP721A(_addresses[0]);
@@ -151,14 +147,50 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         values_[0] = _values[0];
         values_[1] = _values[1];
 
-
-
         emit Sold(
             addresses_,
             values_,
             _saleType
         );
         return true;
+    }
+
+    /**
+     * @dev Checks if signature matches the seller's signature.
+     */
+    function sigMatch(
+        /// _nftContract, _paymentToken, _seller, _buyer
+        address[4] calldata _addresses,
+        /// _tokenId, _soldFor,
+        uint256[2] calldata _values,
+        string memory _txSalt,
+        SaleType _saleType,
+        bytes calldata _signature
+    ) internal view returns (bool, SigError) {
+        if (!usedSignatures[_signature]) {
+            /// gets the message hash from the specified parameters
+            bytes32 _hash = listingHash(
+                _addresses[0],
+                _values[0],
+                _addresses[1],
+                _saleType,
+                _addresses[2],
+                _values[1],
+                _txSalt
+            );
+
+            /// gets the ethereum signed message
+            bytes32 _ethSignedMsgHash = ECDSA.toEthSignedMessageHash(_hash);
+
+            if (ECDSA.recover(_ethSignedMsgHash, _signature) == _addresses[2]) {
+                _throwSigError(SigError.NoErr);
+                return (true, SigError.NoErr);
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     function ignoreSignature(
