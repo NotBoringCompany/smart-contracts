@@ -5,18 +5,23 @@ require('dotenv').config();
 
 async function main() {
 
-  const marketplace = '0x7E04fbd7DcD2B2C188D8d9f5401CF89Cd011ED7f';
-  const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
-  const marketplaceContract = await MarketplaceContract.attach(marketplace);
+  // const marketplace = '0xb6d9Ff1cdC70cA109b8f31aA32125F72be62261d';
+  // const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
+  // const marketplaceContract = await MarketplaceContract.attach(marketplace);
+
+  // // const acceptToken = await marketplaceContract.setPaymentTokens(['0x01BE23585060835E02B77ef475b0Cc51aA1e0709']);
+  // // console.log(acceptToken);
+  // const checkToken = await marketplaceContract.paymentTokens('0x01BE23585060835E02B77ef475b0Cc51aA1e0709');
+  // console.log(checkToken);
 
   // const setSalesFee = await marketplaceContract.setSalesFee(400);
   // console.log(setSalesFee);
 
-  const checkSalesFee = await marketplaceContract.salesFee();
-  console.log(checkSalesFee);
-  // const genesisAAddress = '0xc23f1BC9Ad2682A8659EA67c3b54BbB259FB5C38';
-  // const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
-  // const genesisAContract = await GenesisAContract.attach(genesisAAddress);
+  // const checkSalesFee = await marketplaceContract.salesFee();
+  // console.log(checkSalesFee);
+  const genesisAAddress = '0xc23f1BC9Ad2682A8659EA67c3b54BbB259FB5C38';
+  const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+  const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
   // const moralisAPINode = process.env.MORALIS_NODEAPI;
   // const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
@@ -67,7 +72,7 @@ async function main() {
   // const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
   // console.log(hatchEgg);
 
-  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x00F33E569F0d7023FE5a8aE71E09D82514DD8833');
+  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
   // console.log(ownerIds);
 
   // const tokenURI = await genesisAContract.tokenURI(1);
@@ -76,8 +81,8 @@ async function main() {
   // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
 
-  // const ownerNBMons = await genesisAContract.getGenesisNBMon(10);
-  // console.log(ownerNBMons);
+  const ownerNBMons = await genesisAContract.getGenesisNBMon(3);
+  console.log(ownerNBMons);
 
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(mintWhitelist);

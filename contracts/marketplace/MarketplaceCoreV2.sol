@@ -65,11 +65,9 @@ abstract contract MarketplaceCoreV2 is Context, AccessControl {
     function setPaymentTokens(address[] calldata _paymentTokens) public onlyAdmin {
         // realistically, we wouldn't add more than 256 tokens at once anyway
         for (uint8 i = 0; i < _paymentTokens.length; i++) {
-            // if the token already exists in the list of accepted tokens, skip to the next iteration.
-            if (paymentTokens[_paymentTokens[i]] == true) {
-                continue;
+            if (paymentTokens[_paymentTokens[i]] != true) {
+               paymentTokens[_paymentTokens[i]] = true;
             }
-            paymentTokens[_paymentTokens[i]] = true;
         }
     }
 
