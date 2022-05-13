@@ -49,7 +49,7 @@ abstract contract GenesisNBMonCoreA is NFTCoreA {
 
     // returns a genesis NBMon given an ID
     function getGenesisNBMon(uint256 _nbmonId) public view returns (GenesisNBMon memory) {
-        require(_exists(_nbmonId), "NBMonCore: NBMon with the specified ID does not exist");
+        require(_exists(_nbmonId), "GenesisNBMonCoreA: NBMon with the specified ID does not exist");
         return genesisNBMons[_nbmonId - 1];
     }
 
@@ -58,12 +58,56 @@ abstract contract GenesisNBMonCoreA is NFTCoreA {
         return ownerGenesisNBMonIds[_owner];
     }
 
+    /// changes ownership of the nbmon. public function, but doesn't allow any unauthorized changes
+    /// since it checks ownerOf after atomicMatch in NBMarketplaceV2 gets called.
+    function changeOwnership(uint256 _nbmonId) public {
+        require(_exists(_nbmonId), "GenesisNBMonCoreA: NBMon doesn't exist.");
+        // when atomicMatch (from NBMarketplaceV2) is called, the owner of this _nbmonId (from BEP721A) has actually changed. however, ownerGenesisNBMonIds still isn't updated.
+        // ownerOf returns the actual owner now (which is the buyer).
+        address _currentOwner = ownerOf(_nbmonId);
+        GenesisNBMon storage _genesisNBMon = genesisNBMons[_nbmonId - 1];
+        // _genesisNBMon.owner will still return the seller, so this logic should work unless it already has changed to the buyer.
+        require(_genesisNBMon.owner != _currentOwner, "GenesisNBMonCoreA: Cannot change to the same owner.");
+
+        uint _nbmonIdIndex;
+
+        /// loops through the seller's array of owned NBMon IDs.
+        /// since the array hasn't been updated to remove the seller's nbmonId from the array and add it to the buyer's, we will use the following logic:
+        /// switch the nbmonId's index with the last index on the array and pop it.
+        for (uint i = 0; i < ownerGenesisNBMonIds[_genesisNBMon.owner].length; i++) {
+            // if the loop has found the _nbmonId, this will the _nbmonIdIndex. 
+            if (ownerGenesisNBMonIds[_genesisNBMon.owner][i] == _nbmonId) {
+                _nbmonIdIndex = i;
+                break;
+            }
+
+            // find the last nbmon index to switch with the current nbmonIdIndex.
+            uint256 _lastNbmonIdIndex = ownerGenesisNBMonIds[_genesisNBMon.owner].length - 1;
+            // switching happens here
+            (
+                ownerGenesisNBMonIds[_genesisNBMon.owner][_nbmonIdIndex],
+                ownerGenesisNBMonIds[_genesisNBMon.owner][_lastNbmonIdIndex]
+            ) 
+            =
+            (
+                ownerGenesisNBMonIds[_genesisNBMon.owner][_lastNbmonIdIndex],
+                ownerGenesisNBMonIds[_genesisNBMon.owner][_nbmonIdIndex]
+            );
+            // once switched, the last index (which is now the _nbmonIdIndex) gets popped.
+            ownerGenesisNBMonIds[_genesisNBMon.owner].pop();
+        }
+        // we now replace the owner with the _currentOwner (which is the buyer).
+        _genesisNBMon.owner = _currentOwner;
+        // the seller will now no longer have the _nbmonId but the buyer.
+        ownerGenesisNBMonIds[_currentOwner].push(_nbmonId);
+    }
+ 
     // burns and deletes the genesis NBMon from circulating supply
     function burnNBMon(uint256 _nbmonId) public {
         // ensures that genesis nbmon exists
-        require(_exists(_nbmonId), "NBMonCore: Burning non-existant NBMon");
+        require(_exists(_nbmonId), "GenesisNBMonCoreA: Burning non-existant NBMon");
         // checks if the caller of the function owns the specified _nbmonId
-        require(genesisNBMons[_nbmonId - 1].owner == _msgSender(), "NBMonCore: Owner does not own specified NBMon.");
+        require(genesisNBMons[_nbmonId - 1].owner == _msgSender(), "GenesisNBMonCoreA: Owner does not own specified NBMon.");
         // burns the genesis nbmon
         BEP721AURIStorage._burn(_nbmonId);
 
@@ -83,7 +127,15 @@ abstract contract GenesisNBMonCoreA is NFTCoreA {
         }
         // then swap the last index's genesis NBMon Id with the current index
         uint256 _lastNbmonIdIndex = ownerGenesisNBMonIds[_msgSender()].length - 1;
-        (ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex], ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex]) = (ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex], ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex]);
+        (
+            ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex], 
+            ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex]
+        ) 
+        = 
+        (
+            ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex], 
+            ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex]
+        );
 
         //delete the last item (which is the NBMon Id to be burnt)
         ownerGenesisNBMonIds[_msgSender()].pop();

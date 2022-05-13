@@ -19,7 +19,7 @@ async function main() {
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
-  const genesisAAddress = '0xc23f1BC9Ad2682A8659EA67c3b54BbB259FB5C38';
+  const genesisAAddress = '0xcE87969bCDC473aD12109dF2C147BBC9328B9017';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
   const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
@@ -72,7 +72,7 @@ async function main() {
   // const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
   // console.log(hatchEgg);
 
-  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
+  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x324E81A6A3401CCCcaB6E39B0Ba05623ACAaC42D');
   // console.log(ownerIds);
 
   // const tokenURI = await genesisAContract.tokenURI(1);
@@ -81,7 +81,7 @@ async function main() {
   // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
 
-  const ownerNBMons = await genesisAContract.getGenesisNBMon(3);
+  const ownerNBMons = await genesisAContract.getGenesisNBMon(1);
   console.log(ownerNBMons);
 
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
