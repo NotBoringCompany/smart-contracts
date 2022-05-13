@@ -5,9 +5,18 @@ require('dotenv').config();
 
 async function main() {
 
-  // const marketplace = '0xb6d9Ff1cdC70cA109b8f31aA32125F72be62261d';
-  // const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
-  // const marketplaceContract = await MarketplaceContract.attach(marketplace);
+  const marketplace = '0xb6d9Ff1cdC70cA109b8f31aA32125F72be62261d';
+  const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
+  const marketplaceContract = await MarketplaceContract.attach(marketplace);
+
+  // const setTeamWallet = await marketplaceContract.setTeamWallet('0x8FbFE537A211d81F90774EE7002ff784E352024a');
+  // console.log(setTeamWallet);
+
+  // const nbExcheq = await marketplaceContract.nbExchequer();
+  // console.log(nbExcheq);
+
+  // const setNBExcheq = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
+  // console.log(setNBExcheq);
 
   // // const acceptToken = await marketplaceContract.setPaymentTokens(['0x01BE23585060835E02B77ef475b0Cc51aA1e0709']);
   // // console.log(acceptToken);
@@ -19,9 +28,9 @@ async function main() {
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
-  const genesisAAddress = '0xcE87969bCDC473aD12109dF2C147BBC9328B9017';
-  const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
-  const genesisAContract = await GenesisAContract.attach(genesisAAddress);
+  // const genesisAAddress = '0xcE87969bCDC473aD12109dF2C147BBC9328B9017';
+  // const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+  // const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
   // const moralisAPINode = process.env.MORALIS_NODEAPI;
   // const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
@@ -81,8 +90,8 @@ async function main() {
   // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
 
-  const ownerNBMons = await genesisAContract.getGenesisNBMon(1);
-  console.log(ownerNBMons);
+  // const ownerNBMons = await genesisAContract.getGenesisNBMon(1);
+  // console.log(ownerNBMons);
 
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(mintWhitelist);

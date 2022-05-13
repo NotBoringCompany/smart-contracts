@@ -171,9 +171,9 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         BEP721A _nft = BEP721A(_addresses[0]);
         BEP20 paymentToken = BEP20(_addresses[1]);
         /// multiply the sales fee % to the NFT price
-        uint256 _salesFee = salesFee / 10000 * _values[1];
+        uint256 _salesFee = salesFee * _values[1] / 10000;
         /// multiply the dev cut % to the NFT price
-        uint256 _devCut = devCut / 10000 * _values[1];
+        uint256 _devCut = devCut * _values[1] / 10000;
         /// value to be transferred to the seller after successful purchase
         uint256 _sellerCut = _values[1] - _salesFee - _devCut;
 
@@ -190,7 +190,7 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
 
         /// transfers _devCut if not 0
         if (_devCut > 0) {
-            paymentToken.safeTransferFrom(_msgSender(), admin, _devCut);
+            paymentToken.safeTransferFrom(_msgSender(), teamWallet, _devCut);
         }
 
         /// transfers _nft from seller to buyer
