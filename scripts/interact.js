@@ -5,9 +5,9 @@ require('dotenv').config();
 
 async function main() {
 
-  // const marketplace = '0xb6d9Ff1cdC70cA109b8f31aA32125F72be62261d';
-  // const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
-  // const marketplaceContract = await MarketplaceContract.attach(marketplace);
+  const marketplace = '0xA0170B29fbe12Cd5F9821DF6c2b9CA38d56e0f20';
+  const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
+  const marketplaceContract = await MarketplaceContract.attach(marketplace);
 
   // const setTeamWallet = await marketplaceContract.setTeamWallet('0x8FbFE537A211d81F90774EE7002ff784E352024a');
   // console.log(setTeamWallet);
@@ -18,19 +18,19 @@ async function main() {
   // const setNBExcheq = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
   // console.log(setNBExcheq);
 
-  // // const acceptToken = await marketplaceContract.setPaymentTokens(['0x01BE23585060835E02B77ef475b0Cc51aA1e0709']);
-  // // console.log(acceptToken);
+  // const acceptToken = await marketplaceContract.setPaymentTokens(['0x01BE23585060835E02B77ef475b0Cc51aA1e0709']);
+  // console.log(acceptToken);
   // const checkToken = await marketplaceContract.paymentTokens('0x01BE23585060835E02B77ef475b0Cc51aA1e0709');
   // console.log(checkToken);
 
-  // const setSalesFee = await marketplaceContract.setSalesFee(400);
-  // console.log(setSalesFee);
+  const setSalesFee = await marketplaceContract.setSalesFee(400);
+  console.log(setSalesFee);
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
-  const genesisAAddress = '0x7C1718568eE932c38541a0DdEF7C2234eac927b0';
-  const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
-  const genesisAContract = await GenesisAContract.attach(genesisAAddress);
+  // const genesisAAddress = '0x7C1718568eE932c38541a0DdEF7C2234eac927b0';
+  // const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+  // const genesisAContract = await GenesisAContract.attach(genesisAAddress);
   
   // const moralisAPINode = process.env.MORALIS_NODEAPI;
   // const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
@@ -81,8 +81,8 @@ async function main() {
   // const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
   // console.log(hatchEgg);
 
-  const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
-  console.log(ownerIds);
+  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
+  // console.log(ownerIds);
 
   // const tokenURI = await genesisAContract.tokenURI(1);
   // console.log(tokenURI);

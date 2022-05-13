@@ -2,12 +2,11 @@
 
 pragma solidity ^0.8.13;
 
-import "../BEP721A/BEP721A.sol";
 import "../security/Context.sol";
 import "../security/AccessControl.sol";
 
 /**
- * @dev All marketplace-related functions. Only supports ERC/BEP721A (the more efficient version of ERC/BEP721).
+ * @dev All marketplace-related functions. Only supports NFTCoreA.
  */
 abstract contract MarketplaceCoreV2 is Context, AccessControl {
     /// check for supported BEP20 tokens used for payment in the marketplace

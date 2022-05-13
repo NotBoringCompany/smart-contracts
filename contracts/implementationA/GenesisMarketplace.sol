@@ -3,13 +3,17 @@
 pragma solidity ^0.8.13;
 
 import "../marketplace/MarketplaceCoreV2.sol";
+import "../implementationA/GenesisNBMonMintingA.sol";
 import "../security/Pausable.sol";
 import "../security/EDCSA.sol";
 import "../security/ReentrancyGuard.sol";
 import "../BEP20/BEP20.sol";
 import "../BEP20/SafeBEP20.sol";
 
-contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
+
+/// this marketplace contract is currently only applicable to GenesisNBMonMinting. For future implementations,
+/// a generic marketplace contract standard will beimplemented.
+contract GenesisMarketplace is MarketplaceCoreV2, Pausable, ReentrancyGuard {
     using SafeBEP20 for BEP20;
     /**
      * @dev contains three types of sales.
@@ -141,7 +145,7 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         /// _tokenId, _price
         uint256[2] calldata _values
     ) internal view {
-        BEP721A _nft = BEP721A(_addresses[0]);
+        GenesisNBMonMintingA _nft = GenesisNBMonMintingA(_addresses[0]);
         /// checks for NFT ownership
         require(
             _nft.ownerOf(_values[0]) == _addresses[2], 
@@ -168,7 +172,7 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         uint256[2] calldata _values,
         bytes calldata _signature
     ) internal {
-        BEP721A _nft = BEP721A(_addresses[0]);
+        GenesisNBMonMintingA _nft = GenesisNBMonMintingA(_addresses[0]);
         BEP20 paymentToken = BEP20(_addresses[1]);
         /// multiply the sales fee % to the NFT price
         uint256 _salesFee = salesFee * _values[1] / 10000;
@@ -181,7 +185,7 @@ contract NBMarketplaceV2 is MarketplaceCoreV2, Pausable, ReentrancyGuard {
         paymentToken.safeTransferFrom(_msgSender(),_addresses[2],_sellerCut);
 
         /// omits signature from being able to be used in the future
-        usedSignatures[_signature] == true;
+        usedSignatures[_signature] = true;
 
         /// transfers _salesFee if not 0
         if (_salesFee > 0) {

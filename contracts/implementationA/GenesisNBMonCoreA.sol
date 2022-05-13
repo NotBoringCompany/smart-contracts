@@ -58,9 +58,15 @@ abstract contract GenesisNBMonCoreA is NFTCoreA {
         return ownerGenesisNBMonIds[_owner];
     }
 
+    /// calls safeTransferFrom from BEP721A and changes ownership (using changeOwnership) afterwards for the GenesisNBMonCore part of the logic.
+    function safeTransferFrom(address from, address to, uint256 nbmonId) public virtual override {
+        super.safeTransferFrom(from, to, nbmonId);
+        changeOwnership(nbmonId);
+    }
+
     /// changes ownership of the nbmon. public function, but doesn't allow any unauthorized changes
     /// since it checks ownerOf after atomicMatch in NBMarketplaceV2 gets called.
-    function changeOwnership(uint256 _nbmonId) public {
+    function changeOwnership(uint256 _nbmonId) private {
         require(_exists(_nbmonId), "GenesisNBMonCoreA: NBMon doesn't exist.");
         // when atomicMatch (from NBMarketplaceV2) is called, the owner of this _nbmonId (from BEP721A) has actually changed. however, ownerGenesisNBMonIds still isn't updated.
         // ownerOf returns the actual owner now (which is the buyer).
