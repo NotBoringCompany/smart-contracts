@@ -78,23 +78,22 @@ abstract contract GenesisNBMonCoreA is NFTCoreA {
             // if the loop has found the _nbmonId, this will the _nbmonIdIndex. 
             if (ownerGenesisNBMonIds[_genesisNBMon.owner][i] == _nbmonId) {
                 _nbmonIdIndex = i;
+                // find the last nbmon index to switch with the current nbmonIdIndex.
+                uint256 _lastNbmonIdIndex = ownerGenesisNBMonIds[_genesisNBMon.owner].length - 1;
+                // switching happens here
+                (
+                    ownerGenesisNBMonIds[_genesisNBMon.owner][_nbmonIdIndex],
+                    ownerGenesisNBMonIds[_genesisNBMon.owner][_lastNbmonIdIndex]
+                ) 
+                =
+                (
+                    ownerGenesisNBMonIds[_genesisNBMon.owner][_lastNbmonIdIndex],
+                    ownerGenesisNBMonIds[_genesisNBMon.owner][_nbmonIdIndex]
+                );
+                // once switched, the last index (which is now the _nbmonIdIndex) gets popped.
+                ownerGenesisNBMonIds[_genesisNBMon.owner].pop();
                 break;
             }
-
-            // find the last nbmon index to switch with the current nbmonIdIndex.
-            uint256 _lastNbmonIdIndex = ownerGenesisNBMonIds[_genesisNBMon.owner].length - 1;
-            // switching happens here
-            (
-                ownerGenesisNBMonIds[_genesisNBMon.owner][_nbmonIdIndex],
-                ownerGenesisNBMonIds[_genesisNBMon.owner][_lastNbmonIdIndex]
-            ) 
-            =
-            (
-                ownerGenesisNBMonIds[_genesisNBMon.owner][_lastNbmonIdIndex],
-                ownerGenesisNBMonIds[_genesisNBMon.owner][_nbmonIdIndex]
-            );
-            // once switched, the last index (which is now the _nbmonIdIndex) gets popped.
-            ownerGenesisNBMonIds[_genesisNBMon.owner].pop();
         }
         // we now replace the owner with the _currentOwner (which is the buyer).
         _genesisNBMon.owner = _currentOwner;
