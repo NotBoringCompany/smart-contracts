@@ -127,37 +127,36 @@ abstract contract GenesisNBMonCoreA is NFTCoreA {
             // if the "i"th index of the array contains _nbmonId, add to _nbmonIdIndex and finish the loop
             if (ownerGenesisNBMonIds[_msgSender()][i] == _nbmonId) {
                 _nbmonIdIndex = i;
+                // then swap the last index's genesis NBMon Id with the current index
+                uint256 _lastNbmonIdIndex = ownerGenesisNBMonIds[_msgSender()].length - 1;
+                (
+                    ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex], 
+                    ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex]
+                ) 
+                = 
+                (
+                    ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex], 
+                    ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex]
+                );
+
+                //delete the last item (which is the NBMon Id to be burnt)
+                ownerGenesisNBMonIds[_msgSender()].pop();
+
+                /**
+                * @dev Removal of NBMon from nbmons array. This will only be a simple delete and therefore will leave a gap in the array with a string of "0".
+                *
+                * Since the nbmons array starts from 1 and gets incremented by 1, we do not need to check for the index of the _nbmonId in the array.
+                *
+                * Although leaving a gap, this is the most cost-efficient way of deleting an element from an array, especially when the nbmons array becomes too large in length when there are 
+                * a lot of NBMons minted already.
+                *
+                * Note: @dev When calculating this in the backend, ensure only to load NBMons that do NOT have a string of "0" from the nbmons array. This means that they are removed and burned.
+                */
+                delete genesisNBMons[_nbmonId - 1];
+                
+                emit GenesisNBMonBurned(_nbmonId);
                 break;
             }
         }
-        // then swap the last index's genesis NBMon Id with the current index
-        uint256 _lastNbmonIdIndex = ownerGenesisNBMonIds[_msgSender()].length - 1;
-        (
-            ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex], 
-            ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex]
-        ) 
-        = 
-        (
-            ownerGenesisNBMonIds[_msgSender()][_lastNbmonIdIndex], 
-            ownerGenesisNBMonIds[_msgSender()][_nbmonIdIndex]
-        );
-
-        //delete the last item (which is the NBMon Id to be burnt)
-        ownerGenesisNBMonIds[_msgSender()].pop();
-
-        /**
-         * @dev Removal of NBMon from nbmons array. This will only be a simple delete and therefore will leave a gap in the array with a string of "0".
-         *
-         * Since the nbmons array starts from 1 and gets incremented by 1, we do not need to check for the index of the _nbmonId in the array.
-         *
-         * Although leaving a gap, this is the most cost-efficient way of deleting an element from an array, especially when the nbmons array becomes too large in length when there are 
-         * a lot of NBMons minted already.
-         *
-         * Note: @dev When calculating this in the backend, ensure only to load NBMons that do NOT have a string of "0" from the nbmons array. This means that they are removed and burned.
-         */
-        delete genesisNBMons[_nbmonId - 1];
-        
-        emit GenesisNBMonBurned(_nbmonId);
     }
-
 }

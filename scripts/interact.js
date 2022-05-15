@@ -5,8 +5,8 @@ require('dotenv').config();
 
 async function main() {
 
-  const marketplace = '0xA0170B29fbe12Cd5F9821DF6c2b9CA38d56e0f20';
-  const MarketplaceContract = await ethers.getContractFactory("NBMarketplaceV2");
+  const marketplace = '0x8E71d31d525A298c2C065fCcf1eAd3D595c06A20';
+  const MarketplaceContract = await ethers.getContractFactory("GenesisMarketplace");
   const marketplaceContract = await MarketplaceContract.attach(marketplace);
 
   // const setTeamWallet = await marketplaceContract.setTeamWallet('0x8FbFE537A211d81F90774EE7002ff784E352024a');
@@ -15,16 +15,19 @@ async function main() {
   // const nbExcheq = await marketplaceContract.nbExchequer();
   // console.log(nbExcheq);
 
-  // const setNBExcheq = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
-  // console.log(setNBExcheq);
+  const setNBExcheq = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
+  console.log(setNBExcheq);
 
   // const acceptToken = await marketplaceContract.setPaymentTokens(['0x01BE23585060835E02B77ef475b0Cc51aA1e0709']);
   // console.log(acceptToken);
   // const checkToken = await marketplaceContract.paymentTokens('0x01BE23585060835E02B77ef475b0Cc51aA1e0709');
   // console.log(checkToken);
 
-  const setSalesFee = await marketplaceContract.setSalesFee(400);
-  console.log(setSalesFee);
+  // const setSalesFee = await marketplaceContract.setSalesFee(400);
+  // console.log(setSalesFee);
+
+  // const setDevCut = await marketplaceContract.setDevCut(100);
+  // console.log(setDevCut);
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
