@@ -17,20 +17,27 @@ abstract contract NFTCoreAV2 is BEP721AURIStorage {
         uint256 bornAt;
         /// changes when transferred (such as from buying/selling)
         uint256 transferredAt;
-        /// contains related NFT-specific metadata
-        string[] metadata;
+        /// contains address related metadata
+        address[] addressMetadata;
+        /// contains string related metadata
+        string[] stringMetadata;
+        /// contains numeric/value related metadata
+        uint256[] numericMetadata;
+        /// contains boolean related metadata
+        bool[] boolMetadata;
+        /// contains bytes related metadata
+        bytes32[] bytesMetadata;
     }
 
-    /// an array of NFTs
-    NFT[] internal nfts;
-
+    /// a mapping from the token ID to the full profile of the NFT
+    mapping (uint256 => NFT) internal nfts;
     /// a mapping from an owner to the IDs owned for this particular NFT
     mapping (address => uint256[]) internal ownerNFTIds;
 
     /// returns an NFT given the ID
     function getNFT(uint256 _tokenId) public view returns (NFT memory) {
         require(_exists(_tokenId), "NFTCoreAV2: Specified NFT ID does not exist");
-        return nfts[_tokenId - 1];
+        return nfts[_tokenId];
     }
 
     /// returns the IDs owned by the owner
@@ -50,7 +57,7 @@ abstract contract NFTCoreAV2 is BEP721AURIStorage {
     /// private function, so cannot be tampered with.
     function changeTransferredAt(uint256 _tokenId) private {
         require(_exists(_tokenId), "NFTCoreAV2: Specified NFT ID doesn't exist");
-        NFT storage _nft = nfts[_tokenId - 1];
+        NFT storage _nft = nfts[_tokenId];
         _nft.transferredAt = block.timestamp;
 
     }
@@ -72,7 +79,7 @@ abstract contract NFTCoreAV2 is BEP721AURIStorage {
         require(_exists(_tokenId), "NFTCoreAV2: Specified NFT ID doesn't exist");
         // when atomicMatch is called, ownerOf is already the buyer.
         address _currentOwner = ownerOf(_tokenId);
-        NFT storage _nft = nfts[_tokenId - 1];
+        NFT storage _nft = nfts[_tokenId];
 
         /**
          * Presumably at this point, _nft.owner is still the seller,
@@ -177,7 +184,7 @@ abstract contract NFTCoreAV2 is BEP721AURIStorage {
         // ensures that the NFT exists
         require(_exists(tokenId), "NFTCoreAV2: Specified NFT ID doesn't exist");
         // checks if caller is the owner, otherwise revert the tx
-        require(nfts[tokenId - 1].owner == _msgSender(), "NFTCoreAV2: Caller is not the NFT's owner");
+        require(nfts[tokenId].owner == _msgSender(), "NFTCoreAV2: Caller is not the NFT's owner");
         // burns the NFT
         BEP721AURIStorage._burn(tokenId);
 
@@ -207,18 +214,10 @@ abstract contract NFTCoreAV2 is BEP721AURIStorage {
                 );
                 // once the indexes are switched, we pop the last index (which is now the _nftIdIndex).
                 _ownerIds.pop();
-                /**
-                 * @dev Removal of the NFT from the nfts array. This will be a simple delete and thus
-                 * will leave a gap in the array with a string of "0" for the deleted value.
-                 *
-                 * Since the nfts array starts from 1 and increments up, we don't have to check for the value and instead just insert the tokenId and - 1.
-                 *
-                 * Although leaving a gap, this is the most cost-efficient way of removing an NFT from the array, 
-                 * especially when a lot of them are minted already.
-                 *
-                 * Note at devs: If you are using the nfts array for querying/data purposes, please ignore the "0" values.
-                 */
-                delete nfts[tokenId - 1];
+                
+                /// delete will replace the values for this particular ID to "0".
+                /// @dev if you are using the nfts[id] mapping, please ignore values that are "0".
+                delete nfts[tokenId];
                 emit NFTBurned(tokenId);
                 break;
             }

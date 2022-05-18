@@ -17,14 +17,14 @@ contract GenesisNBMonMintingA is GenesisNBMonCoreA, ReentrancyGuard {
         whitelistedMintLimit = 1;
         //total = 5000
         devMintLimit = 350;
-        publicSupplyLimit = 5000;
+        publicSupplyLimit = 4650;
         // for KOLs, partnerships etc.
         adoptionIncentivesSupplyLimit = 70;
     }
 
-    /// @dev Emitted when breeding is set to 'allowed'. Triggered by _owner. 
+    /// @dev Emitted when minting is set to 'allowed'. Triggered by _owner. 
     event MintingAllowed(address _owner);
-    /// @dev Emitted when breeding is set to 'not allowed'. Triggered by _owner.
+    /// @dev Emitted when minting is set to 'not allowed'. Triggered by _owner.
     event MintingNotAllowed(address _owner);
 
     bool public _mintingAllowed;
