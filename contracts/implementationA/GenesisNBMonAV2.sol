@@ -514,4 +514,21 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
             "GenesisNBMonAV2: Invalid minter signature."
         );
     }
+
+    /// withdraws balance from this contract to admin.
+    /// Note: Please do NOT send unnecessary funds to this contract.
+    /// This is used as a mechanism to transfer any balance that this contract has to admin.
+    /// we will NOT be responsible for any funds transferred accidentally unless notified immediately.
+    function withdrawFunds() public onlyAdmin {
+        _msgSender().transfer(address(this).balance);
+    }
+
+    /// withdraws tokens from this contract to admin.
+    /// Note: Please do NOT send unnecessary tokens to this contract.
+    /// This is used as a mechanism to transfer any tokens that this contract has to admin.
+    /// we will NOT be responsible for any tokens transferred accidentally unless notified immediately.
+    function withdrawTokens(address _tokenAddr, uint256 _amount) public onlyAdmin {
+        BEP20 _token = BEP20(_tokenAddr);
+        _token.transfer(_msgSender(), _amount);
+    }
 }
