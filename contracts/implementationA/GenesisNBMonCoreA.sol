@@ -6,7 +6,6 @@ import "../BEP721A/NFTCoreA.sol";
 
 /**
  * @dev The first and rarest generation of NBMons that will ever be minted. Only 4500 of these will exist. They are NOT breedable and have a higher chance to be more powerful than their ordinary NBMon counterparts. 
- * Note: This contract does NOT have the newer, gas-efficient ERC721A standard which mints huge batches at almost the same price as minting only one. That version will be on a separate contract.
  * Most of the contract will have the same logic as NBMonCore.sol. Please refer to that contract to understand the variables and methods used.
  *
  * Uses NFTCoreA which inherits from BEP721A for cheaper batch minting.

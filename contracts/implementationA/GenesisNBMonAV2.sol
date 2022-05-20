@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 
 import "../BEP721A/NFTCoreAV2.sol";
 import "../security/ReentrancyGuard.sol";
+import "../security/ECDSA.sol";
 
 contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     constructor() BEP721A("Genesis NBMon", "G-NBMON") {
@@ -393,5 +394,124 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
             emit NFTMinted(i, _owner, block.timestamp);
         }
         _safeMint(_owner, _amountToMint);
+    }
+
+    /**
+     * @dev Start of hatching logic
+     */
+
+    event HatchingAllowed(address _owner);
+    event HatchingNotAllowed(address _owner);
+
+    modifier whenHatchingAllowed() {
+        require(_hatchingAllowed, "GenesisNBMonMintingA: Hatching enabled.");
+        _;
+    }
+
+    modifier whenHatchingNotAllowed() {
+        require(!_hatchingAllowed, "GenesisNBMonMintingA: Hatching disabled.");
+        _;
+    }
+
+    function allowHatching() public whenHatchingNotAllowed onlyAdmin {
+        _hatchingAllowed = true;
+        emit HatchingAllowed(_msgSender());
+    }
+
+    function disallowHatching() public whenHatchingAllowed onlyAdmin {
+        _hatchingAllowed = false;
+        emit HatchingNotAllowed(_msgSender());
+    }
+
+    bool public _hatchingAllowed;
+
+    /// checks if a minting signature was already used.
+    mapping (bytes => bool) internal usedMintingSignature;
+
+    /// generates a hash when minting with the given parameters.
+    function mintingHash(
+        uint256 _nbmonId,
+        address _minter,
+        uint256 _bornAt,
+        /// nbmonStats array as a string
+        string memory _nbmonStats,
+        string memory _txSalt
+    ) public pure returns (bytes32) {
+        return 
+            keccak256(
+                abi.encodePacked(
+                    _nbmonId,
+                    _minter,
+                    _bornAt,
+                    _nbmonStats,
+                    _txSalt
+            )
+        );
+    }
+
+    /// hatches an nbmon and updates its stats.
+    function hatchFromEgg(
+        uint256 _nbmonId,
+        address _minter,
+        uint256 _bornAt,
+        string[] calldata _stringMetadata,
+        uint256[] calldata _numericMetadata,
+        bool[] calldata _boolMetadata,
+        string calldata _txSalt,
+        bytes calldata _signature
+    ) public nonReentrant whenHatchingAllowed {
+        sigMatch(_nbmonId, _minter, _bornAt, _stringMetadata[0], _txSalt, _signature);
+        nbmonCheck(_nbmonId);
+
+        // once checks are all passed, we hatch and update the stats of the NBMon
+        NFT storage _nbmon = nfts[_nbmonId];
+
+        _nbmon.bornAt = block.timestamp;
+        _nbmon.stringMetadata = _stringMetadata;
+        _nbmon.numericMetadata = _numericMetadata;
+        _nbmon.boolMetadata = _boolMetadata;
+
+        usedMintingSignature[_signature] = true;
+    }
+
+    /// checks if certain requirements of the nbmon is met before hatching.
+    function nbmonCheck(uint256 _nbmonId) internal view {
+        require(_exists(_nbmonId), "GenesisNBMonAV2: Specified NBMon ID doesn't exist");
+
+        NFT memory _nbmon = nfts[_nbmonId];
+        require(_nbmon.owner == _msgSender(), "GenesisNBMonAV2: Caller is not owner of specified NBMon.");
+        require(_nbmon.boolMetadata[0] == true, "GenesisNBMonAV2: NBMon is already hatched/not an egg anymore.");
+        require(_nbmon.bornAt + _nbmon.numericMetadata[0] <= block.timestamp, "GenesisNBMonAV2: Egg is not ready to hatch yet.");
+    }
+
+    /// checks if signature matches the minter's signature.
+    function sigMatch(
+        uint256 _nbmonId,
+        address _minter,
+        uint256 _bornAt,
+        /// nbmonStats array as a string
+        string calldata _nbmonStats,
+        string calldata _txSalt,
+        bytes calldata _signature
+    ) internal view {
+        // ensures that signature hasn't been used already
+        require(!usedMintingSignature[_signature], "GenesisNBMonAV2: Signature already used.");
+
+        // gets the minting hash from the specified parameters
+        bytes32 _mintingHash = mintingHash(
+            _nbmonId,
+            _minter,
+            _bornAt,
+            _nbmonStats,
+            _txSalt
+        );
+
+        // gets the ethereum signed message
+        bytes32 _ethSignedMsgHash = ECDSA.toEthSignedMessageHash(_mintingHash);
+
+        require(
+            ECDSA.recover(_ethSignedMsgHash, _signature) == _minter,
+            "GenesisNBMonAV2: Invalid minter signature."
+        );
     }
 }

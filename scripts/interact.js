@@ -12,11 +12,18 @@ async function main() {
   // const setTeamWallet = await marketplaceContract.setTeamWallet('0x8FbFE537A211d81F90774EE7002ff784E352024a');
   // console.log(setTeamWallet);
 
+  const linkContractAddr = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709';
+  const BEP20Contract = await ethers.getContractFactory("BEP20");
+  const bep20Contract = BEP20Contract.attach(linkContractAddr);
+
+  // const checkAllowance = await bep20Contract.allowance("0x8FbFE537A211d81F90774EE7002ff784E352024a","0x8E71d31d525A298c2C065fCcf1eAd3D595c06A20");
+  // console.log(checkAllowance);
+
   // const nbExcheq = await marketplaceContract.nbExchequer();
   // console.log(nbExcheq);
 
-  const setNBExcheq = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
-  console.log(setNBExcheq);
+  // const setNBExcheq = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
+  // console.log(setNBExcheq);
 
   // const acceptToken = await marketplaceContract.setPaymentTokens(['0x01BE23585060835E02B77ef475b0Cc51aA1e0709']);
   // console.log(acceptToken);
@@ -31,9 +38,10 @@ async function main() {
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
-  // const genesisAAddress = '0x7C1718568eE932c38541a0DdEF7C2234eac927b0';
-  // const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
-  // const genesisAContract = await GenesisAContract.attach(genesisAAddress);
+  const genesisAAddress = '0xcE87969bCDC473aD12109dF2C147BBC9328B9017';
+  const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+  const genesisAContract = GenesisAContract.attach(genesisAAddress);
+
   
   // const moralisAPINode = process.env.MORALIS_NODEAPI;
   // const nodeURL = `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`;
@@ -84,8 +92,14 @@ async function main() {
   // const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
   // console.log(hatchEgg);
 
-  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
+  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x8FbFE537A211d81F90774EE7002ff784E352024a');
   // console.log(ownerIds);
+
+  // const getOwner = await genesisAContract.ownerOf(2);
+  // console.log(getOwner);
+
+  const checkSig = await marketplaceContract.usedSignatures("0x18ccde3a021904623e4e3c6f4e1e83edcf0c7af891f6dfdea6ee4164bf5e837544d3596c6595bca639a93daa13753d0194af585567345af151b20dc7c23c5d2a1b");
+  console.log(checkSig);
 
   // const tokenURI = await genesisAContract.tokenURI(1);
   // console.log(tokenURI);
