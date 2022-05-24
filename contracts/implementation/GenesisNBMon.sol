@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.13;
 
-import "../BEP721A/NFTCoreAV2.sol";
+import "../BEP721A/NFTCoreA.sol";
 import "../security/ReentrancyGuard.sol";
 import "../security/ECDSA.sol";
 
-contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
+contract GenesisNBMon is NFTCoreA, ReentrancyGuard {
     constructor() BEP721A("Genesis NBMon", "G-NBMON") {
         setBaseURI("https://nbcompany.fra1.digitaloceanspaces.com/genesisNBMon/");
         _mintingAllowed = true;
@@ -30,12 +30,12 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     bool public _mintingAllowed;
 
     modifier whenMintingAllowed() {
-        require(_mintingAllowed, "GenesisNBMonAV2: Minting enabled.");
+        require(_mintingAllowed, "GenesisNBMon: Minting enabled.");
         _;
     }
 
     modifier whenMintingNotAllowed() {
-        require(!_mintingAllowed, "GenesisNBMonAV2: Minting disabled.");
+        require(!_mintingAllowed, "GenesisNBMon: Minting disabled.");
         _;
     }
 
@@ -93,6 +93,23 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
         whitelistedMintLimit = _limit;
     }
 
+    // changes the dev mint limit. Note: Cannot exceed 300. 
+    // can be lowered to give more general mint limit to both public & whitelisted.
+    function changeDevMintLimit(uint16 _limit) public onlyAdmin {
+        require(_limit <= 300, "GenesisNBMon: Dev mint limit cannot exceed 300.");
+        devMintLimit = _limit;
+    }
+
+    // changes general mint limit
+    function changeGeneralMintLimit(uint16 _limit) public onlyAdmin {
+        generalMintLimit = _limit;
+    }
+
+    // changes adoption incentives supply limit
+    function changeAdoptionIncentivesSupplyLimit(uint16 _limit) public onlyAdmin {
+        adoptionIncentivesSupplyLimit = _limit;
+    }
+
     /**
      * @dev Represents a minter's profile. Includes relevant information needed for minting.
      */
@@ -109,16 +126,16 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     }
 
     // mapping from a minter's address to the full profile of the minter
-    mapping (address => Minter) internal minterProfile;
+    mapping (address => Minter) private minterProfile;
 
     /// adds a single minter with their own profile to minterProfile. 
     /// @dev allows anyone to register their own profile if not registered already (even those that are not theirs).
-    /// since anyone can mint, even adding a wallet address that's not theirs will help that particular address.
-    /// Note: this function will get called when a user registers their wallet if they want to mint. (if not registered by someone already)
+    /// since anyone can mint, even adding a wallet address that's not theirs will help that particular address
+    /// Note: this function will get called when a user registers their wallet if they want to mint (required). (if not registered by someone already)
     /// for whitelisting version, please check `whitelistAddress` or `whitelistAddresses`. requires admin to whitelist.
     function addMinter(address _addr) public {
         // ensures that minter profile doesn't already exist for this address
-        require(minterProfile[_addr].addr == address(0), "GenesisNBMonAV2: Minter profile already exists");
+        require(minterProfile[_addr].addr == address(0), "GenesisNBMon: Minter profile already exists");
         
         Minter memory _minter = Minter(_addr, false, false, 0);
         minterProfile[_addr] = _minter;
@@ -142,6 +159,11 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
         return minterProfile[_addr];
     }
 
+    /// checks if address has a profile
+    function profileRegistered(address _addr) public view returns (bool) {
+        return minterProfile[_addr] != address(0);
+    }
+
     /// whitelists a single address.
     /// requires the user to not be whitelisted yet and to not be blacklisted.
     /// if address does not have a profile yet, we can create it for them.
@@ -152,16 +174,17 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
             minterProfile[_addr] = _minter;
         // if profile already exists, ensure that the user is not blacklisted and not whitelisted already.
         } else {
-            require(minterProfile[_addr].blacklisted == false, "GenesisNBMonAV2: Minter is blacklisted");
-            require(minterProfile[_addr].whitelisted == false, "GenesisNBMonAV2: Minter is already whitelisted");
-            
             Minter storage _minter = minterProfile[_addr];
+
+            require(_minter.blacklisted == false, "GenesisNBMon: Minter is blacklisted");
+            require(_minter.whitelisted == false, "GenesisNBMon: Minter is already whitelisted");
+        
             _minter.whitelisted = true;
         }
     }
 
     /// whitelists multiple addresses at once.
-    /// requires the user(s) to have their profiles registered, to not be whitelisted yet and to not be blacklisted.
+    /// requires the user(s) to not be whitelisted yet and to not be blacklisted.
     /// if one of the addresses does not have a profile yet, we can create it for them.
     function whitelistAddresses(address[] memory _addrs) public onlyAdmin {
         for (uint i = 0; i < _addrs.length; i++) {
@@ -171,14 +194,32 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
                 minterProfile[_addrs[i]] = _minter;
             // if profile already exists, ensure that the user is not blacklisted and not whitelisted already.
             } else {
+                Minter storage _minter = minterProfile[_addrs[i]];
                 if (
                     minterProfile[_addrs[i]].blacklisted == false &&
                     minterProfile[_addrs[i]].whitelisted == false
-                ) 
-                {
-                    Minter storage _minter = minterProfile[_addrs[i]];
+                ) {
                     _minter.whitelisted = true;
                 }
+            }
+        }
+    }
+
+    /// removes a minter's whitelist role.
+    /// Note: does NOT check if _addr != address(0) since default whitelisted values for 0 addresses are set to false.
+    function removeWhitelist(address _addr) public onlyAdmin {
+        Minter storage _minter = minterProfile[_addr];
+        require(_minter.whitelisted == true, "GenesisNBMon: Minter not whitelisted");
+        
+        _minter.whitelisted = false;
+    }
+
+    /// removes multiple minters' whitelist roles.
+    function removeWhitelists(address[] memory _addrs) public onlyAdmin {
+        for (uint i = 0; i < _addrs.length; i++) {
+            Minter storage _minter = minterProfile[_addrs[i]];
+            if (_minter.whitelisted == true) {
+                _minter.whitelisted = false;
             }
         }
     }
@@ -186,16 +227,16 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     /// blacklists an address from being able to get whitelisted or mint.
     /// if the address is not registered yet, we can create the profile immediately and issue the blacklist.
     function blacklistAddress(address _addr) public onlyAdmin {
-        Minter storage _toBlacklist = minterProfile[_addr];
         // if the address is not registered yet (== address(0)), we create a profile for them.
-        if (_toBlacklist.addr == address(0)) {
-            addMinter(_addr);
-            _toBlacklist.blacklisted = true;
+        if (minterProfile[_addr].addr == address(0)) {
+            Minter memory _toBlacklist = Minter(_addr, false, true, 0);
+            minterProfile[_addr] = _toBlacklist;
         // if the address is already registered, simply blacklist the address.
         // requires the address to not already be blacklisted.
         // if the address was whitelisted, they will get unwhitelisted.
         } else {
-            require(_toBlacklist.blacklisted == false, "GenesisNBMonAV2: Minter already blacklisted");
+            Minter storage _toBlacklist = minterProfile[_addr];
+            require(_toBlacklist.blacklisted == false, "GenesisNBMon: Minter already blacklisted");
             _toBlacklist.blacklisted = true;
             if (_toBlacklist.whitelisted == true) {
                 _toBlacklist.whitelisted == false;
@@ -207,20 +248,39 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     /// if one of the addresses is not registered yet, we can create the profile immediately and issue the blacklist.
     function blacklistAddresses(address[] memory _addrs) public onlyAdmin {
         for (uint i = 0; i < _addrs.length; i++) {
-            Minter storage _toBlacklist = minterProfile[_addrs[i]];
             // if the address is not registered yet (== address(0)), we can create the profile for them.
-            if (_toBlacklist.addr == address(0)) {
-                addMinter(_addrs[i]);
-                _toBlacklist.blacklisted = true;
+            if (minterProfile[_addrs[i]].addr == address(0)) {
+                Minter memory _toBlacklist = Minter(_addrs[i], false, true, 0);
+                minterProfile[_addrs[i]] = _toBlacklist;
             // if the address is already registered, simply blacklist the address
             // requires the address to not already be blacklisted.
             // if the address was whitelisted, they will get unwhitelisted.
             } else {
-                require(_toBlacklist.blacklisted == false, "GenesisNBMonAV2: Minter already blacklisted");
+                Minter storage _toBlacklist = minterProfile[_addrs[i]];
+                require(_toBlacklist.blacklisted == false, "GenesisNBMon: Minter already blacklisted");
                 _toBlacklist.blacklisted = true;
                 if (_toBlacklist.whitelisted == true) {
                     _toBlacklist.whitelisted == false;
                 }
+            }
+        }
+    }
+    
+    /// removes a minter's blacklist.
+    /// Note: does NOT check if _addr != address(0) since default whitelisted values for 0 addresses are set to false.
+    function removeBlacklist(address _addr) public onlyAdmin {
+        Minter storage _minter = minterProfile[_addr];
+        require(_minter.blacklisted == true, "GenesisNBMon: Minter not whitelisted");
+        
+        _minter.blacklisted = false;
+    }
+
+    /// removes multiple minters' blacklists.
+    function removeBlacklists(address[] memory _addrs) public onlyAdmin {
+        for (uint i = 0; i < _addrs.length; i++) {
+            Minter storage _minter = minterProfile[_addrs[i]];
+            if (_minter.blacklisted == true) {
+                _minter.blacklisted = false;
             }
         }
     }
@@ -245,13 +305,13 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
 
     // ensures that the minter is whitelisted
     modifier isWhitelisted(address _addr) {
-        require(checkWhitelisted(_addr), "GenesisNBMonAV2: Minter is not whitelisted.");
+        require(checkWhitelisted(_addr), "GenesisNBMon: Minter is not whitelisted.");
         _;
     }
 
     // ensures that the minter is not blacklisted
     modifier isNotBlacklisted(address _addr) {
-        require(!checkBlacklisted(_addr), "GenesisNBMonAV2: Minter is blacklisted.");
+        require(!checkBlacklisted(_addr), "GenesisNBMon: Minter is blacklisted.");
         _;
     }
 
@@ -263,7 +323,7 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     modifier belowWhitelistedMintLimit(uint16 _amountToMint, address _addr) {
         Minter memory _minter = minterProfile[_addr];
         uint16 _totalToMint = _minter.amountMinted + _amountToMint;
-        require(_totalToMint <= whitelistedMintLimit, "GenesisNBMonAV2: Whitelisted mint limit per address exceeded.");
+        require(_totalToMint <= whitelistedMintLimit, "GenesisNBMon: Whitelisted mint limit per address exceeded.");
         _;
     }
 
@@ -272,7 +332,7 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     modifier belowMintLimit(uint16 _amountToMint, address _addr) {
         Minter memory _minter = minterProfile[_addr];
         uint16 _totalToMint = _minter.amountMinted + _amountToMint;
-        require(_totalToMint <= generalMintLimit, "GenesisNBMonAV2: Mint limit per address exceeded");
+        require(_totalToMint <= generalMintLimit, "GenesisNBMon: Mint limit per address exceeded");
         _;
     }
 
@@ -281,7 +341,7 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
         // dev is minter in AccessControl.sol.
         Minter memory _dev = minterProfile[minter];
         uint16 _totalToMint = _dev.amountMinted + _amountToMint;
-        require(_totalToMint <= devMintLimit, "GenesisNBMonAV2: Dev mint limit exceeded.");
+        require(_totalToMint <= devMintLimit, "GenesisNBMon: Dev mint limit exceeded.");
         _;
     }
 
@@ -292,14 +352,14 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
         Minter memory _dev = minterProfile[minter];
         uint16 _totalToMint = _dev.amountMinted + _amountToMint;
         // here, we ensure that the _totalToMint doesn't exceed the dev's minting limit + the adoption incentives supply limit.
-        require(_totalToMint <= (devMintLimit + adoptionIncentivesSupplyLimit), "GenesisNBMonAV2: Adoption incentives mint limit exceeded.");
+        require(_totalToMint <= (devMintLimit + adoptionIncentivesSupplyLimit), "GenesisNBMon: Adoption incentives mint limit exceeded.");
         _;
     }
 
     // ensures that minters cannot mint more than the general supply. Once generalSupplyLimit has reached, minting is closed.
     modifier belowGeneralSupplyLimit(uint16 _amountToMint) {
         uint16 _totalToMint = uint16(totalSupply()) + _amountToMint;
-        require(_totalToMint <= generalSupplyLimit, "GenesisNBMonAV2: Supply limit reached. Minting no longer possible.");
+        require(_totalToMint <= generalSupplyLimit, "GenesisNBMon: Supply limit reached. Minting no longer possible.");
         _;
     }
 
@@ -402,6 +462,7 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
 
     event HatchingAllowed(address _owner);
     event HatchingNotAllowed(address _owner);
+    event Hatched(address indexed _owner, uint256 indexed _nbmonId);
 
     modifier whenHatchingAllowed() {
         require(_hatchingAllowed, "GenesisNBMonMintingA: Hatching enabled.");
@@ -426,14 +487,14 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
     bool public _hatchingAllowed;
 
     /// checks if a minting signature was already used.
-    mapping (bytes => bool) internal usedMintingSignature;
+    mapping (bytes => bool) internal usedHatchingSignature;
 
-    /// generates a hash when minting with the given parameters.
-    function mintingHash(
+    /// generates a hash when hatching with the given parameters.
+    function hatchingHash(
         uint256 _nbmonId,
         address _minter,
         uint256 _bornAt,
-        /// nbmonStats array as a string
+        /// nbmonStats array as a string (e.g. "[a, b, c, d]")
         string memory _nbmonStats,
         string memory _txSalt
     ) public pure returns (bytes32) {
@@ -471,17 +532,18 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
         _nbmon.numericMetadata = _numericMetadata;
         _nbmon.boolMetadata = _boolMetadata;
 
-        usedMintingSignature[_signature] = true;
+        emit Hatched(_msgSender(), _nbmonId);
+        usedHatchingSignature[_signature] = true;
     }
 
     /// checks if certain requirements of the nbmon is met before hatching.
     function nbmonCheck(uint256 _nbmonId) internal view {
-        require(_exists(_nbmonId), "GenesisNBMonAV2: Specified NBMon ID doesn't exist");
+        require(_exists(_nbmonId), "GenesisNBMon: Specified NBMon ID doesn't exist");
 
         NFT memory _nbmon = nfts[_nbmonId];
-        require(_nbmon.owner == _msgSender(), "GenesisNBMonAV2: Caller is not owner of specified NBMon.");
-        require(_nbmon.boolMetadata[0] == true, "GenesisNBMonAV2: NBMon is already hatched/not an egg anymore.");
-        require(_nbmon.bornAt + _nbmon.numericMetadata[0] <= block.timestamp, "GenesisNBMonAV2: Egg is not ready to hatch yet.");
+        require(_nbmon.owner == _msgSender(), "GenesisNBMon: Caller is not owner of specified NBMon.");
+        require(_nbmon.boolMetadata[0] == true, "GenesisNBMon: NBMon is already hatched/not an egg anymore.");
+        require(_nbmon.bornAt + _nbmon.numericMetadata[0] <= block.timestamp, "GenesisNBMon: Egg is not ready to hatch yet.");
     }
 
     /// checks if signature matches the minter's signature.
@@ -495,7 +557,7 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
         bytes calldata _signature
     ) internal view {
         // ensures that signature hasn't been used already
-        require(!usedMintingSignature[_signature], "GenesisNBMonAV2: Signature already used.");
+        require(!usedHatchingSignature[_signature], "GenesisNBMon: Signature already used.");
 
         // gets the minting hash from the specified parameters
         bytes32 _mintingHash = mintingHash(
@@ -511,7 +573,7 @@ contract GenesisNBMonAV2 is NFTCoreAV2, ReentrancyGuard {
 
         require(
             ECDSA.recover(_ethSignedMsgHash, _signature) == _minter,
-            "GenesisNBMonAV2: Invalid minter signature."
+            "GenesisNBMon: Invalid minter signature."
         );
     }
 

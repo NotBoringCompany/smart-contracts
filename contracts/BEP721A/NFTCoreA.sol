@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 
 import "./BEP721AURIStorage.sol";
 
-abstract contract NFTCoreAV2 is BEP721AURIStorage {
+abstract contract NFTCoreA is BEP721AURIStorage {
     /**
      * @dev Instance of the NFT
      */

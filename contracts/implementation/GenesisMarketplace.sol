@@ -3,7 +3,7 @@
 pragma solidity ^0.8.13;
 
 import "../marketplace/MarketplaceCoreV2.sol";
-import "../implementationA/GenesisNBMonMintingA.sol";
+import "../implementation/GenesisNBMonMintingA.sol";
 import "../security/Pausable.sol";
 import "../security/ECDSA.sol";
 import "../security/ReentrancyGuard.sol";
