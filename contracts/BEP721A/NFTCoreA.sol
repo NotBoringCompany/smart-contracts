@@ -17,6 +17,9 @@ abstract contract NFTCoreA is BEP721AURIStorage {
         uint256 bornAt;
         /// changes when transferred (such as from buying/selling)
         uint256 transferredAt;
+        /// checks if NFT is currently being sold.
+        /// Note: only works for NBCompany's marketplace.
+        bool onSale;
         /// contains address related metadata
         address[] addressMetadata;
         /// contains string related metadata
@@ -27,12 +30,26 @@ abstract contract NFTCoreA is BEP721AURIStorage {
         bool[] boolMetadata;
         /// contains bytes related metadata
         bytes32[] bytesMetadata;
+        /// checks if this NFT is currently on sale
     }
 
     /// a mapping from the token ID to the full profile of the NFT
     mapping (uint256 => NFT) internal nfts;
     /// a mapping from an owner to the IDs owned for this particular NFT
     mapping (address => uint256[]) internal ownerNFTIds;
+
+    /// only usable in NBCompany's marketplace.
+    /// a modifier to check if current token ID is currently being sold.
+    /// Note: This modifier is used to restrict specific usecases if the NFT is being sold.
+    /// This is to ensure that data execution is intact and wouldn't be deterred by miscalculations.
+    /// For instance, if a seller decides to transfer tokenId to another user while being sold, the seller will change.
+    /// This could cause issues to determine who the initial seller was as the data was already changed.
+    /// Hence, we use this modifier to ensure that these would be restricted as much as possible.
+    modifier notOnSale(uint256 tokenId) {
+        NFT memory _nft = nfts[tokenId];
+        require(!_nft.onSale, "Specified token ID is currently on sale.");
+        _;
+    }
 
     /// returns an NFT given the ID
     function getNFT(uint256 _tokenId) public view returns (NFT memory) {
@@ -47,8 +64,16 @@ abstract contract NFTCoreA is BEP721AURIStorage {
 
     /// modified version of BEP721A's safeTransferFrom.
     /// changesOwnership using NFTCoreAV2-specific code and also changes `transferredAt`.
-    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override {
-        BEP721A.safeTransferFrom(from, to, tokenId);
+    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override notOnSale(tokenId) {
+        super.safeTransferFrom(from, to, tokenId);
+        changeOwnership(tokenId);
+        changeTransferredAt(tokenId);
+    }
+
+    /// NOT advised. only inherited to override `notOnSale` modifier.
+    /// @dev Please use the safer form `safeTransferFrom` to do these types of transfers.
+    function transferFrom(address from, address to, uint256 tokenId) public virtual override notOnSale(tokenId) {
+        super.transferFrom(from, to, tokenId);
         changeOwnership(tokenId);
         changeTransferredAt(tokenId);
     }
