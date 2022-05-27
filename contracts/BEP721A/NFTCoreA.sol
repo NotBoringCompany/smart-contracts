@@ -46,19 +46,18 @@ abstract contract NFTCoreA is BEP721AURIStorage {
     /// This could cause issues to determine who the initial seller was as the data was already changed.
     /// Hence, we use this modifier to ensure that these would be restricted as much as possible.
     modifier notOnSale(uint256 tokenId) {
-        NFT memory _nft = nfts[tokenId];
-        require(!_nft.onSale, "Specified token ID is currently on sale.");
+        require(!nfts[tokenId].onSale, "NFTC1");
         _;
     }
 
     /// returns an NFT given the ID
-    function getNFT(uint256 _tokenId) public view returns (NFT memory) {
-        require(_exists(_tokenId), "NFTCoreAV2: Specified NFT ID does not exist");
+    function getNFT(uint256 _tokenId) external view returns (NFT memory) {
+        require(_exists(_tokenId), "NFTC2");
         return nfts[_tokenId];
     }
 
     /// returns the IDs owned by the owner
-    function getOwnerNFTIds(address _owner) public view returns (uint256[] memory) {
+    function getOwnerNFTIds(address _owner) external view returns (uint256[] memory) {
         return ownerNFTIds[_owner];
     }
 
@@ -81,7 +80,7 @@ abstract contract NFTCoreA is BEP721AURIStorage {
     /// change transferredAt for _nft when transferred.
     /// private function, so cannot be tampered with.
     function changeTransferredAt(uint256 _tokenId) private {
-        require(_exists(_tokenId), "NFTCoreAV2: Specified NFT ID doesn't exist");
+        require(_exists(_tokenId), "NFTC3");
         NFT storage _nft = nfts[_tokenId];
         _nft.transferredAt = block.timestamp;
 
@@ -101,7 +100,7 @@ abstract contract NFTCoreA is BEP721AURIStorage {
      * On top of that, we will also change the NFT.owner.
      */
     function changeOwnership(uint256 _tokenId) private {
-        require(_exists(_tokenId), "NFTCoreAV2: Specified NFT ID doesn't exist");
+        require(_exists(_tokenId), "NFTC4");
         // when atomicMatch is called, ownerOf is already the buyer.
         address _currentOwner = ownerOf(_tokenId);
         NFT storage _nft = nfts[_tokenId];
@@ -113,10 +112,10 @@ abstract contract NFTCoreA is BEP721AURIStorage {
          * and the _nft.owner is now the buyer (_currentOwner).
          */
         // here, this check should pass unless _nft.owner (which is still the seller) is already changed to _currentOwner (which is the buyer).
-        require(_nft.owner != _currentOwner, "NFTCoreAV2: _nft.owner is no longer the seller.");
+        require(_nft.owner != _currentOwner, "NFTC5");
         // right now, we're implying that the seller (which is still the _nft.owner) still owns _tokenId.
         // if the seller doesn't own it anymore, we assume that the buyer (_currentOwner) already has it.
-        require(checkOwnedId(_nft.owner, _tokenId) == true, "NFTCoreAV2: Seller doesn't own the NFT anymore.");
+        require(checkOwnedId(_nft.owner, _tokenId) == true, "NFTC6");
 
         /**
          * @dev If the checks pass, we now know that _nft.owner is still the seller, and _currentOwner is the buyer.
@@ -205,13 +204,13 @@ abstract contract NFTCoreA is BEP721AURIStorage {
     /**
      *@dev See {BEP721URIStorage-_burn}.
      */
-    function burnNFT(uint256 tokenId) public virtual {
+    function burnNFT(uint256 tokenId) external virtual {
         // ensures that the NFT exists
-        require(_exists(tokenId), "NFTCoreAV2: Specified NFT ID doesn't exist");
+        require(_exists(tokenId), "NFTC7");
         // checks if caller is the owner, otherwise revert the tx
-        require(nfts[tokenId].owner == _msgSender(), "NFTCoreAV2: Caller is not the NFT's owner");
+        require(nfts[tokenId].owner == _msgSender(), "NFTC8");
         // burns the NFT
-        BEP721AURIStorage._burn(tokenId);
+        super._burn(tokenId);
 
         /**
          * @dev The next few steps will be NFTCoreAV2-specific.
