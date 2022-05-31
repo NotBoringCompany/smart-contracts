@@ -79,6 +79,7 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
         // 1. hatchingDuration (time it takes until it can hatch)
         // 2. potential (health, energy, attack, defense, sp attack, sp defense, speed)
         // 3. fertility points
+        // 4. hatchedAt (if already hatched later on)
         uint256[] memory _numericMetadata,
         /// includes:
         // 1. isEgg (if nbmon is still an egg or not)
@@ -205,9 +206,11 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
         // once checks are all passed, we hatch and update the stats of the NBMon
         NFT storage _nbmon = nfts[_nbmonId];
 
-        _nbmon.bornAt = block.timestamp;
+        uint256 _hatchedAt = block.timestamp;
+
         _nbmon.stringMetadata = _hatchingStats.stringMetadata;
         _nbmon.numericMetadata = _hatchingStats.numericMetadata;
+        _nbmon.numericMetadata[9] = _hatchedAt;
         _nbmon.boolMetadata = _hatchingStats.boolMetadata;
 
         emit Hatched(_msgSender(), _nbmonId);

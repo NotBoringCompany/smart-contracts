@@ -33,9 +33,9 @@ async function main() {
    console.log("Contract address: ", genesisAContract.address);
 
   /**
-   * @dev Marketplace Core contract
+   * @dev Marketplace Lite contract
    */
-  // const MarketplaceContract = await ethers.getContractFactory("GenesisMarketplace").catch((err) => console.log(err));
+  // const MarketplaceContract = await ethers.getContractFactory("MarketplaceLite").catch((err) => console.log(err));
   // console.log("genesis contract factory received");
   // const marketplaceContract = await MarketplaceContract.deploy().catch((err) => console.log(err));
   // console.log("genesis contract being deployed");

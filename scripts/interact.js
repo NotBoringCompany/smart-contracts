@@ -5,16 +5,16 @@ require('dotenv').config();
 
 async function main() {
 
-  const marketplace = '0x8E71d31d525A298c2C065fCcf1eAd3D595c06A20';
-  const MarketplaceContract = await ethers.getContractFactory("GenesisMarketplace");
-  const marketplaceContract = await MarketplaceContract.attach(marketplace);
+  // const marketplace = '0x8E71d31d525A298c2C065fCcf1eAd3D595c06A20';
+  // const MarketplaceContract = await ethers.getContractFactory("GenesisMarketplace");
+  // const marketplaceContract = await MarketplaceContract.attach(marketplace);
 
   // const setTeamWallet = await marketplaceContract.setTeamWallet('0x8FbFE537A211d81F90774EE7002ff784E352024a');
   // console.log(setTeamWallet);
 
-  const linkContractAddr = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709';
-  const BEP20Contract = await ethers.getContractFactory("BEP20");
-  const bep20Contract = BEP20Contract.attach(linkContractAddr);
+  // const linkContractAddr = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709';
+  // const BEP20Contract = await ethers.getContractFactory("BEP20");
+  // const bep20Contract = BEP20Contract.attach(linkContractAddr);
 
   // const checkAllowance = await bep20Contract.allowance("0x8FbFE537A211d81F90774EE7002ff784E352024a","0x8E71d31d525A298c2C065fCcf1eAd3D595c06A20");
   // console.log(checkAllowance);
@@ -38,8 +38,8 @@ async function main() {
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
-  const genesisAAddress = '0xcE87969bCDC473aD12109dF2C147BBC9328B9017';
-  const GenesisAContract = await ethers.getContractFactory("GenesisNBMonMintingA");
+  const genesisAAddress = '0xb0D9C83F3116f7c8f88Ae42f435b92CE8174162a';
+  const GenesisAContract = await ethers.getContractFactory("GenesisNBMon");
   const genesisAContract = GenesisAContract.attach(genesisAAddress);
 
   
@@ -71,19 +71,12 @@ async function main() {
 
   // const signer = new ethers.Wallet(proces.env.WALLET_1, `https://speedy-nodes-nyc.moralis.io/${process.env.MORALIS_NODEAPI}/eth/rinkeby`);
 
-  // let abi = 
+  // let amountToMint = 1;
+  // let stringMetadata = ["Male", "Common", "Not mutated", "Origin", "Lamox"];
+  // let numericMetadata = [300, 20, 24, 16, 3, 14, 20, 14, 3000];
+  // let boolMetadata = [true];
 
-  // name = NBC Experiment 1
-  // let owner = "0xe253773Fdd10B4Bd9d7567e37003F7029144EF90";
-  // let amountToMint = 10;
-  // let hatchingDuration = 30;
-  // let nbmonStats = [];
-  // let types = [];
-  // let potential = [];
-  // let passives = [];
-  // let isEgg = true;
-
-  // const devMint = await genesisAContract.devGenesisEggMint(amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
+  // const devMint = await genesisAContract.devMint(amountToMint, stringMetadata, numericMetadata, boolMetadata);
   // console.log(devMint);
 
   // const publicMint = await genesisAContract.publicGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
@@ -98,8 +91,8 @@ async function main() {
   // const getOwner = await genesisAContract.ownerOf(2);
   // console.log(getOwner);
 
-  const checkSig = await marketplaceContract.usedSignatures("0x18ccde3a021904623e4e3c6f4e1e83edcf0c7af891f6dfdea6ee4164bf5e837544d3596c6595bca639a93daa13753d0194af585567345af151b20dc7c23c5d2a1b");
-  console.log(checkSig);
+  // const checkSig = await marketplaceContract.usedSignatures("0x18ccde3a021904623e4e3c6f4e1e83edcf0c7af891f6dfdea6ee4164bf5e837544d3596c6595bca639a93daa13753d0194af585567345af151b20dc7c23c5d2a1b");
+  // console.log(checkSig);
 
   // const tokenURI = await genesisAContract.tokenURI(1);
   // console.log(tokenURI);
@@ -107,8 +100,8 @@ async function main() {
   // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
 
-  // const ownerNBMons = await genesisAContract.getGenesisNBMon(1);
-  // console.log(ownerNBMons);
+  const ownerNBMons = await genesisAContract.getNFT(1);
+  console.log(ownerNBMons);
 
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(mintWhitelist);

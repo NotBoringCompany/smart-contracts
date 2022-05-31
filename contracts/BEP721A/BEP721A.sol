@@ -41,7 +41,7 @@ contract BEP721A is Context, BEP165, IBEP721, IBEP721Metadata, Pausable {
     }
 
     // The tokenId of the next token to be minted.
-    uint256 internal _currentIndex;
+    uint256 public _currentIndex;
 
     // The number of tokens burned.
     uint256 internal _burnCounter;
