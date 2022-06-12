@@ -16,18 +16,13 @@ abstract contract MarketplaceCore is Context, AccessControl {
 
     /// the sales fee portion will be received here (our community treasury)
     address public nbExchequer;
-    /// the team fee portion will be received here (team's wallet)
-    address public teamWallet;
 
     /**
      * @dev We've divided the fee into two to be more transparent. 
      * Calculated in 100 basis points. 100 points = 1%.
-     * @dev Total fee (in %) = (salesFee + devCut) / 100.
      */
     /// sales fee portion
     uint16 public salesFee;
-    /// dev's cut
-    uint16 public devCut;
 
     /**
      * @dev Sets the NBExchequer address to receive the sales fee portion.
@@ -37,24 +32,10 @@ abstract contract MarketplaceCore is Context, AccessControl {
     }
 
     /**
-     * @dev Sets the team wallet address to receive the team fee portion.
-     */
-    function setTeamWallet(address _teamWallet) public onlyAdmin {
-        teamWallet = _teamWallet;
-    }
-
-    /**
      * @dev Sets the sales fee of transactions.
      */
     function setSalesFee(uint16 _salesFee) public onlyAdmin {
         salesFee = _salesFee;
-    }
-
-    /**
-     * @dev Sets the dev cut of transactions.
-     */
-    function setDevCut(uint16 _devCut) public onlyAdmin {
-        devCut = _devCut;
     }
 
     /**

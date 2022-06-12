@@ -206,11 +206,8 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
         // once checks are all passed, we hatch and update the stats of the NBMon
         NFT storage _nbmon = nfts[_nbmonId];
 
-        uint256 _hatchedAt = block.timestamp;
-
         _nbmon.stringMetadata = _hatchingStats.stringMetadata;
         _nbmon.numericMetadata = _hatchingStats.numericMetadata;
-        _nbmon.numericMetadata[9] = _hatchedAt;
         _nbmon.boolMetadata = _hatchingStats.boolMetadata;
 
         emit Hatched(_msgSender(), _nbmonId);
