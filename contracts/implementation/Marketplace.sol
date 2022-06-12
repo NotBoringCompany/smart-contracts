@@ -191,41 +191,37 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
      * First checks if signature matches the seller's signature, then transfers NFT to the buyer and payment to the seller.
      */
     function atomicMatch(
-        address _nftContract,
-        address _paymentToken,
-        address _seller,
+        // nft contract, payment token and seller
+        address[3] calldata addresses,
         uint256 _tokenId,
         SaleType _saleType,
-        uint88 _price,
-        uint88 _startingPrice,
-        uint88 _endingPrice,
-        uint88 _minimumReserveBid,
-        uint88 _winningBid,
-        uint24 _duration,
-        uint24 _secondsPassed,
+        // price, starting price, ending price, minimum reserve bid and winning bid
+        uint88[5] calldata uint88s,
+        // duration and seconds passed
+        uint24[2] calldata uint24s,
         string memory _txSalt,
         bytes calldata _signature
     ) public nonReentrant whenMarketplaceOpen returns (bool) {
         /// firstly, check if payment token specified is allowed
-        require(paymentTokens[_paymentToken] == true, "Marketplace: Payment token not allowed.");
-
+        require(paymentTokens[addresses[1]] == true, "Marketplace: Payment token not allowed.");
         // goes through 3 checks. if all succeeds, NFT gets transferred to the buyer and payment gets transferred to the seller.
-        sigMatch(_nftContract, _paymentToken, _seller, _tokenId, _saleType, _price, _startingPrice, _endingPrice, _minimumReserveBid, _duration, _txSalt, _signature);
+        sigMatch(addresses, _tokenId, _saleType, uint88s, uint24s[0], _txSalt, _signature);
 
+        // if sale type is bid auction, require winning bid to be greater than minimum reserve bid, otherwise tx reverts.
         if (_saleType == SaleType.BidAuction) {
-            require(_winningBid >= _minimumReserveBid, "Marketplace: Minimum reserve bid is not met");
+            require(uint88s[4] >= uint88s[3], "Marketplace: Minimum reserve bid is not met");
         }
         // here, _currentNFTPrice will show 0 if sale type is fixed price (check is done in prePaymentCheck() function).
         // transfers() will also check for the sale type and require either price or currentNFTPrice to be greater than 0 depending on sale type, otherwise tx reverts.
-        uint88 _currentNFTPrice = prePaymentCheck(_nftContract, _paymentToken, _seller, _tokenId, _saleType, _price, _startingPrice, _endingPrice, _winningBid, _duration, _secondsPassed);
-        transfers(_nftContract, _paymentToken, _seller, _tokenId, _saleType, _price, _currentNFTPrice, _winningBid, _signature);
+        uint88 _currentNFTPrice = prePaymentCheck(addresses, _tokenId, _saleType, uint88s, uint24s);
+        transfers(addresses, _tokenId, _saleType, uint88s, _currentNFTPrice, _signature);
 
         if (_saleType == SaleType.FixedPrice) {
-            emit Sold(_nftContract, _tokenId, _price, _msgSender());
+            emit Sold(addresses[0], _tokenId, uint88s[0], _msgSender());
         } else if (_saleType == SaleType.TimedAuction) {
-            emit Sold(_nftContract,_tokenId, _currentNFTPrice, _msgSender());
+            emit Sold(addresses[0],_tokenId, _currentNFTPrice, _msgSender());
         } else if (_saleType == SaleType.BidAuction) {
-            emit Sold(_nftContract, _tokenId, _winningBid, _msgSender());
+            emit Sold(addresses[0], _tokenId, uint88s[4], _msgSender());
         }
 
         return true;
@@ -236,15 +232,12 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
      * Note: Called by the buyer.
      */
     function sigMatch(
-        address _nftContract,
-        address _paymentToken,
-        address _seller,
+        // nft contract, payment token and seller
+        address[3] calldata addresses,
         uint256 _tokenId,
         SaleType _saleType,
-        uint88 _price,
-        uint88 _startingPrice,
-        uint88 _endingPrice,
-        uint88 _minimumReserveBid,
+        // price, starting price, ending price, minimum reserve bid and winning bid (winning bid however won't be used here)
+        uint88[5] calldata uint88s,
         uint24 _duration,
         string memory _txSalt,
         bytes calldata _signature
@@ -253,15 +246,15 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
 
         // gets the listing hash from the specified parameters
         bytes32 _hash = listingHash(
-            _nftContract,
+            addresses[0],
             _tokenId,
-            _paymentToken,
+            addresses[1],
             _saleType,
-            _seller,
-            _price,
-            _startingPrice,
-            _endingPrice,
-            _minimumReserveBid,
+            addresses[2],
+            uint88s[0],
+            uint88s[1],
+            uint88s[2],
+            uint88s[3],
             _duration,
             _txSalt
         );
@@ -272,7 +265,7 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
         // recovers the address that signed _ethSignedMsgHash with _signature.
         // must return the seller's address, otherwise the tx reverts.
         require(
-            ECDSA.recover(_ethSignedMsgHash, _signature) == _seller,
+            ECDSA.recover(_ethSignedMsgHash, _signature) == addresses[2],
             "Marketplace: Invalid seller signature"
         );
     }
@@ -283,39 +276,36 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
      * Returns the current NFT price if sale is timed auction sale, otherwise it returns 0.
      */
     function prePaymentCheck(
-        address _nftContract,
-        address _paymentToken,
-        address _seller,
+        // nft contract, payment token and seller
+        address[3] calldata addresses,
         uint256 _tokenId,
         SaleType _saleType,
-        uint88 _price,
-        uint88 _startingPrice,
-        uint88 _endingPrice,
-        uint88 _winningBid,
-        uint24 _duration,
-        uint24 _secondsPassed
+        // price, starting price, ending price, minimum reserve bid and winning bid (minimum reserve bid here won't be used)
+        uint88[5] calldata uint88s,
+        // duration and seconds passed
+        uint24[2] calldata uint24s
     ) internal view returns (uint88) {
         // gets the contract-level instance of the NFT contract address and checks for NFT ownership
-        NFTCoreA _nft = NFTCoreA(_nftContract);
+        NFTCoreA _nft = NFTCoreA(addresses[0]);
         require(
-            _nft.ownerOf(_tokenId) == _seller,
+            _nft.ownerOf(_tokenId) == addresses[2],
             "Marketplace: Seller is currently not the owner of this NFT"
         );
 
         // gets the contract-level instance of the payment token and check for buyer's balance and allowance
-        BEP20 paymentToken_ = BEP20(_paymentToken);
+        BEP20 paymentToken_ = BEP20(addresses[1]);
         uint88 _currentNFTPrice;
 
         // different pre payment check logic for fixed price and for timed auction sales
         if (_saleType == SaleType.FixedPrice) {
             // checks if buyer's balance is enough to pay for the NFT
             require(
-                paymentToken_.balanceOf(_msgSender()) >= _price,
+                paymentToken_.balanceOf(_msgSender()) >= uint88s[0],
                 "Marketplace: Buyer's balance is too low"
             );
             // checks if buyer has allowed marketplace contract to spend at least _currentNFTPrice on their behalf
             require(
-                paymentToken_.allowance(_msgSender(), address(this)) >= _price,
+                paymentToken_.allowance(_msgSender(), address(this)) >= uint88s[0],
                 "Marketplace: Buyer's approval for marketplace contract is too low"
             );
             
@@ -323,7 +313,7 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
 
         } else if (_saleType == SaleType.TimedAuction) {
             // calculates the current price for timed auction sale
-            _currentNFTPrice = calculateCurrentPrice(_startingPrice, _endingPrice, _duration, _secondsPassed);
+            _currentNFTPrice = calculateCurrentPrice(uint88s[1], uint88s[2], uint24s[0], uint24s[1]);
             // checks if buyer's balance is enough to pay for the NFT
             require(
                 paymentToken_.balanceOf(_msgSender()) >= _currentNFTPrice,
@@ -338,12 +328,12 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
         } else if (_saleType == SaleType.BidAuction) {
             // checks if buyer's balance is enough to pay for the NFT
             require(
-                paymentToken_.balanceOf(_msgSender()) >= _winningBid,
+                paymentToken_.balanceOf(_msgSender()) >= uint88s[4],
                 "Marketplace: Buyer's balance is too low"
             );
             // checks if buyer has allowed marketplace contract to spend at least _currentNFTPrice on their behalf
             require(
-                paymentToken_.allowance(_msgSender(), address(this)) >= _winningBid,
+                paymentToken_.allowance(_msgSender(), address(this)) >= uint88s[4],
                 "Marketplace: Buyer's approval for marketplace contract is too low"
             );
 
@@ -358,40 +348,40 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
      * When all previous checks passes, this function gets called and will issue the NFT to the buyer and transfer the payment to the seller.
      */
     function transfers(
-        address _nftContract,
-        address _paymentToken,
-        address _seller,
+        // nft contract, payment token and seller
+        address[3] calldata addresses,
         uint256 _tokenId,
         SaleType _saleType,
-        uint88 _price,
+        // price, start price, ending price, minimum reserve bid and winning bid (start price, ending price and minimum reserve bid not used)
+        uint88[5] calldata uint88s,
+        // not included in uint88 array for simplicity purposes
         uint88 _currentNFTPrice,
-        uint88 _winningBid,
         bytes calldata _signature
     ) internal {
-        NFTCoreA _nft = NFTCoreA(_nftContract);
-        BEP20 paymentToken_ = BEP20(_paymentToken);
+        NFTCoreA _nft = NFTCoreA(addresses[0]);
+        BEP20 paymentToken_ = BEP20(addresses[1]);
         uint88 _salesFee;
         uint88 _sellerCut;
         
         if (_saleType == SaleType.FixedPrice) {
-            require(_price > 0, "Marketplace: Price cannot be 0");
+            require(uint88s[0] > 0, "Marketplace: Price cannot be 0");
             // calculates the sales fee of the NFT
-            _salesFee = uint88(salesFee * _price / 10000);
+            _salesFee = uint88(salesFee * uint88s[0] / 10000);
             // calculates the seller's payment after _salesFee is added
-            _sellerCut = _price - _salesFee;
+            _sellerCut =  uint88s[0] - _salesFee;
         } else if (_saleType == SaleType.TimedAuction) {
             require(_currentNFTPrice > 0, "Marketplace: Current NFT price cannot be 0");
             _salesFee = uint88(salesFee * _currentNFTPrice / 10000);
             _sellerCut = _currentNFTPrice - _salesFee;
         } else if (_saleType == SaleType.BidAuction) {
-            require(_winningBid > 0, "Marketplace: Winning bid cannot be 0");
+            require(uint88s[4] > 0, "Marketplace: Winning bid cannot be 0");
             // calculates the sales fee from the winning bid
-            _salesFee = uint88(salesFee * _winningBid / 10000);
-            _sellerCut = _winningBid - _salesFee;
+            _salesFee = uint88(salesFee * uint88s[4] / 10000);
+            _sellerCut = uint88s[4] - _salesFee;
         }
 
         // transfers _sellerCut from buyer to seller (i.e. buyer pays seller)
-        paymentToken_.safeTransferFrom(_msgSender(), _seller, _sellerCut);
+        paymentToken_.safeTransferFrom(_msgSender(), addresses[2], _sellerCut);
 
         // omits signature from being able to be used again in the future
         usedSignatures[_signature] = true;
@@ -402,7 +392,7 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
         }
 
         // transfers NFT from seller to buyer
-        _nft.safeTransferFrom(_seller, _msgSender(), _tokenId);
+        _nft.safeTransferFrom(addresses[2], _msgSender(), _tokenId);
     }
 
     /**
@@ -432,30 +422,27 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
      * @dev Invalidates a signature that was in use (either by removing listing or purely by ignoring it in general).
      */
     function ignoreSignature(
-        address _nftContract,
+        // nft contract, payment token and seller
+        address[3] calldata addresses,
         uint256 _tokenId,
-        address _paymentToken,
         SaleType _saleType,
-        address _seller,
-        uint88 _price,
-        uint88 _startingPrice,
-        uint88 _endingPrice,
-        uint88 _minimumReserveBid,
+        // price, starting price, ending price, minimum reserve bid and winning bid (winning bid not used here)
+        uint88[5] calldata uint88s,
         uint24 _duration,
         string memory _txSalt,
         bytes calldata _signature
     ) public {
         // gets the listing hash from the specified parameters
         bytes32 _hash = listingHash(
-            _nftContract,
+            addresses[0],
             _tokenId,
-            _paymentToken,
+            addresses[1],
             _saleType,
-            _seller,
-            _price,
-            _startingPrice,
-            _endingPrice,
-            _minimumReserveBid,
+            addresses[2],
+            uint88s[0],
+            uint88s[1],
+            uint88s[2],
+            uint88s[3],
             _duration,
             _txSalt
         );
@@ -466,7 +453,7 @@ contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
         // recovers the address that signed _ethSignedMsgHash with _signature.
         // must return the seller's address, otherwise the tx reverts.
         require(
-            ECDSA.recover(_ethSignedMsgHash, _signature) == _seller,
+            ECDSA.recover(_ethSignedMsgHash, _signature) == addresses[2],
             "Marketplace: Invalid seller signature"
         );
 
