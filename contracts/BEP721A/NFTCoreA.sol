@@ -151,9 +151,9 @@ abstract contract NFTCoreA is BEP721AURIStorage {
         }
         // now that the switching is done and the ID is removed, we can switch the _nft.owner from the seller to the buyer.
         _nft.owner = _currentOwner;
-        // _ownerIds is now the buyer since _nft.owner is already switched to the buyer.
         // we will now push the ID to the buyer's owned IDs.
-        _ownerIds.push(_tokenId);
+        uint256[] storage _buyerOwnerIds = ownerNFTIds[_nft.owner];
+        _buyerOwnerIds.push(_tokenId);
     }
 
     /// checks if an owner owns a particular ID.

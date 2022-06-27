@@ -14,6 +14,7 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
     constructor() BEP721A("Genesis NBMon", "G-NBMON") {
         setBaseURI("https://nbcompany.fra1.digitaloceanspaces.com/genesisNBMon/");
         _mintingAllowed = true;
+        _hatchingAllowed = true;
         // 0.15 ETH
         publicMintingPrice = 0.15 * 10 ** 18;
         // 0.125 ETH
@@ -154,6 +155,10 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
     function checkSigExists(bytes memory _signature) public view onlyAdmin returns (bool) {
         return hatchingStats[_signature].exists;
     }
+
+    function checkSigExistsPvt(bytes memory _signature) private view returns (bool) {
+        return hatchingStats[_signature].exists; 
+    }
     
     /// given a signature, add hatching stats to be used for hatching an nbmon
     function addHatchingStats(
@@ -199,7 +204,7 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
     /// hatches an nbmon and updates its stats.
     function hatchFromEgg(bytes memory _signature) public nonReentrant whenHatchingAllowed {
         HatchingStats memory _hatchingStats = hatchingStats[_signature];
-        checkSigExists(_signature);
+        require(checkSigExistsPvt(_signature) == true, "GN6");
         uint256 _nbmonId = _hatchingStats.nbmonId;
         nbmonHatchReq(_nbmonId);
 
@@ -223,7 +228,7 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
         NFT memory _nbmon = nfts[_nbmonId];
         require(_nbmon.owner == _msgSender(), "GN4");
         require(_nbmon.boolMetadata[0] == true, "GN5");
-        require(_nbmon.bornAt + _nbmon.numericMetadata[0] <= block.timestamp, "GN6");
+        require(_nbmon.bornAt + _nbmon.numericMetadata[0] <= block.timestamp, "GN7");
     }
 
     /// checks if signature matches the minter's signature.
@@ -247,7 +252,7 @@ contract GenesisNBMon is MintingCore, ReentrancyGuard {
 
         require(
             ECDSA.recover(_ethSignedMsgHash, _signature) == _minter,
-            "GN7"
+            "GN8"
         );
     }
 

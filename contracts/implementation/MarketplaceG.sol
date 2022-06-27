@@ -12,7 +12,7 @@ import "../BEP20/SafeBEP20.sol";
 
 /// marketplace contract which currently accepts NFTCoreA inherited contracts.
 /// this version will NOT focus on gasless implementations and instead will require users to pay gas everytime.
-contract Marketplace is MarketplaceCore, Pausable, ReentrancyGuard {
+contract MarketplaceG is MarketplaceCore, Pausable, ReentrancyGuard {
     using SafeBEP20 for BEP20;
 
     // if false, cease all sale-related functions.

@@ -5,12 +5,16 @@ require('dotenv').config();
 
 async function main() {
 
-  // const marketplace = '0x8E71d31d525A298c2C065fCcf1eAd3D595c06A20';
-  // const MarketplaceContract = await ethers.getContractFactory("GenesisMarketplace");
-  // const marketplaceContract = await MarketplaceContract.attach(marketplace);
+  const marketplace = '0xDcfCF2d3517D658c10EEab5de488F01D5DBb85f1';
+  const MarketplaceContract = await ethers.getContractFactory("Marketplace");
+  const marketplaceContract = await MarketplaceContract.attach(marketplace);
 
-  // const setTeamWallet = await marketplaceContract.setTeamWallet('0x8FbFE537A211d81F90774EE7002ff784E352024a');
+  // const setTeamWallet = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
   // console.log(setTeamWallet);
+
+  // const openmarketplace = await marketplaceContract.openMarketplace();
+  // console.log(openmarketplace);
+
 
   // const linkContractAddr = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709';
   // const BEP20Contract = await ethers.getContractFactory("BEP20");
@@ -25,7 +29,7 @@ async function main() {
   // const setNBExcheq = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
   // console.log(setNBExcheq);
 
-  // const acceptToken = await marketplaceContract.setPaymentTokens(['0x01BE23585060835E02B77ef475b0Cc51aA1e0709']);
+  // const acceptToken = await marketplaceContract.setPaymentTokens([linkContractAddr]);
   // console.log(acceptToken);
   // const checkToken = await marketplaceContract.paymentTokens('0x01BE23585060835E02B77ef475b0Cc51aA1e0709');
   // console.log(checkToken);
@@ -38,9 +42,23 @@ async function main() {
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
-  const genesisAAddress = '0xb0D9C83F3116f7c8f88Ae42f435b92CE8174162a';
+  const genesisAAddress = '0x3534B3fc72b04C678f0008A75A5E19c8dCbB7bBc';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMon");
   const genesisAContract = GenesisAContract.attach(genesisAAddress);
+
+  const getIds = await genesisAContract.getNFT(5);
+  console.log(getIds);
+  // const allowHatching = await genesisAContract.allowHatching();
+  // console.log(allowHatching);
+
+  // const registerAddress = await genesisAContract.addMinters(['0x6FdCB216A701f6Beb805E6f4F3714cb1581cEb80']);
+  // console.log(registerAddress);
+
+
+  // // const totalSupply = await genesisAContract.totalSupply();
+  // // console.log(totalSupply);
+  // const updateMaxSupply = await genesisAContract.updateMaxSupply();
+  // console.log(updateMaxSupply);
 
   
   // const moralisAPINode = process.env.MORALIS_NODEAPI;
@@ -56,21 +74,6 @@ async function main() {
   // const changeURI = await genesisAContract.setBaseURI("https://lol.com/");
   // console.log(changeURI);
 
-  // const txHash = "0x415d35912236e643e69118e3ce396945b7409ae807f925eecb2c69fdccb599a0";
-
-  // let txReceipt = await customHttpProvider.getTransaction(txHash);
-
-  // if (txReceipt && txReceipt.blockNumber) {
-  //   if (ethers.utils.formatEther(txReceipt.value) == 0.01) {
-  //     console.log(txReceipt);
-  //   } else {
-  //     console.log("not valid");
-  //   }
-  // }
-
-
-  // const signer = new ethers.Wallet(proces.env.WALLET_1, `https://speedy-nodes-nyc.moralis.io/${process.env.MORALIS_NODEAPI}/eth/rinkeby`);
-
   // let amountToMint = 1;
   // let stringMetadata = ["Male", "Common", "Not mutated", "Origin", "Lamox"];
   // let numericMetadata = [300, 20, 24, 16, 3, 14, 20, 14, 3000];
@@ -85,7 +88,7 @@ async function main() {
   // const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
   // console.log(hatchEgg);
 
-  // const ownerIds = await genesisAContract.getOwnerGenesisNBMonIds('0x8FbFE537A211d81F90774EE7002ff784E352024a');
+  // const ownerIds = await genesisAContract.getOwnerNFTIds('0xe253773fdd10b4bd9d7567e37003f7029144ef90');
   // console.log(ownerIds);
 
   // const getOwner = await genesisAContract.ownerOf(2);
@@ -100,15 +103,16 @@ async function main() {
   // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
 
-  const ownerNBMons = await genesisAContract.getNFT(1);
-  console.log(ownerNBMons);
+  // const ownerNBMons = await genesisAContract.getNFT(1);
+  // console.log(ownerNBMons);
 
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
   // console.log(mintWhitelist);
+  // const addressesToWL = ['0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796'];
 
-  // const whitelistAddress = await genesisAContract.whitelistAddress('0xa1BD4289940ed38100d9B93Bf4cBdf6E7de0689D');
+  // const whitelistAddress = await genesisAContract.whitelistAddresses(addressesToWL);
   // console.log(whitelistAddress);
-  // const checkWhitelist = await genesisAContract.whitelisted('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
+  // const checkWhitelist = await genesisAContract.checkWhitelisted('0x6ef0f724e780E5D3aD66f2A4FCbEF64A774eA796');
   // console.log(checkWhitelist);
 
   // const amountMinted = await genesisAContract.amountMinted('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');

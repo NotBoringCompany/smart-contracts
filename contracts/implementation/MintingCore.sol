@@ -53,7 +53,12 @@ abstract contract MintingCore is NFTCoreA {
     // NOT changeable once deployed
     uint16 public generalSupplyLimit;
     // max supply of total mintable NBMons
-    uint16 public maxSupply = devMintLimit + generalSupplyLimit;
+    uint16 public maxSupply;
+
+    // updates the max supply
+    function updateMaxSupply() external onlyAdmin {
+        maxSupply = devMintLimit + generalSupplyLimit;
+    }
 
     // changes the public minting price
     function changePublicMintingPrice(uint256 _price) external onlyAdmin {
