@@ -13,13 +13,13 @@ const gasReporter = async () => {
     /**
      * @dev Minting the genesis NBMon (WITH DATA)
      */
-    let owner = '0x460107fAB29D57a6926DddC603B7331F4D3bCA05';
-    let hatchingDuration = 100;
-    let nbmonStats = ["male", "common", "not mutated", "origin", "todillo", "3000"];
-    let types = ["earth", "reptile"];
-    let potential = [5, 10, 5, 10, 5, 10, 10];
-    let passives = ["passive 1", "passive 2"];
-    let isEgg = true;
+    // let owner = '0x460107fAB29D57a6926DddC603B7331F4D3bCA05';
+    // let hatchingDuration = 100;
+    // let nbmonStats = ["male", "common", "not mutated", "origin", "todillo", "3000"];
+    // let types = ["earth", "reptile"];
+    // let potential = [5, 10, 5, 10, 5, 10, 10];
+    // let passives = ["passive 1", "passive 2"];
+    // let isEgg = true;
 
     // await genesisContract.mintGenesisNBMon(owner, hatchingDuration, nbmonStats, types, potential, passives, isEgg)
     // .then(console.log("NBMon minted"));

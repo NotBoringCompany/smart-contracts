@@ -5,15 +5,15 @@ require('dotenv').config();
 
 async function main() {
 
-  const marketplace = '0xDcfCF2d3517D658c10EEab5de488F01D5DBb85f1';
+  const marketplace = '0x2a1A6C05DdBe2dBAcb6D2E3971bE1FB9B729A612';
   const MarketplaceContract = await ethers.getContractFactory("Marketplace");
   const marketplaceContract = await MarketplaceContract.attach(marketplace);
 
   // const setTeamWallet = await marketplaceContract.setNBExchequer('0xe253773Fdd10B4Bd9d7567e37003F7029144EF90');
   // console.log(setTeamWallet);
 
-  // const openmarketplace = await marketplaceContract.openMarketplace();
-  // console.log(openmarketplace);
+  const openmarketplace = await marketplaceContract.openMarketplace();
+  console.log(openmarketplace);
 
 
   // const linkContractAddr = '0x01BE23585060835E02B77ef475b0Cc51aA1e0709';
@@ -42,12 +42,15 @@ async function main() {
 
   // const checkSalesFee = await marketplaceContract.salesFee();
   // console.log(checkSalesFee);
-  const genesisAAddress = '0x3534B3fc72b04C678f0008A75A5E19c8dCbB7bBc';
+  const genesisAAddress = '0x41E9F77fF39D7B2A7E25C8aB244247C92f82fA1D';
   const GenesisAContract = await ethers.getContractFactory("GenesisNBMon");
   const genesisAContract = GenesisAContract.attach(genesisAAddress);
 
-  const getIds = await genesisAContract.getNFT(5);
-  console.log(getIds);
+  // const burnNFT = await genesisAContract.burnNFT(2);
+  // console.log()
+
+  // const getIds = await genesisAContract.getNFT(5);
+  // console.log(getIds);
   // const allowHatching = await genesisAContract.allowHatching();
   // console.log(allowHatching);
 
@@ -55,10 +58,15 @@ async function main() {
   // console.log(registerAddress);
 
 
-  // // const totalSupply = await genesisAContract.totalSupply();
-  // // console.log(totalSupply);
+  // const totalSupply = await genesisAContract.totalSupply();
+  // console.log(totalSupply);
+  // const maxSupply = await genesisAContract.maxSupply();
+  // console.log(maxSupply);
   // const updateMaxSupply = await genesisAContract.updateMaxSupply();
   // console.log(updateMaxSupply);
+
+  // const checkPrice = await genesisAContract.whitelistedMintingPrice();
+  // console.log(checkPrice);
 
   
   // const moralisAPINode = process.env.MORALIS_NODEAPI;
@@ -82,7 +90,7 @@ async function main() {
   // const devMint = await genesisAContract.devMint(amountToMint, stringMetadata, numericMetadata, boolMetadata);
   // console.log(devMint);
 
-  // const publicMint = await genesisAContract.publicGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);
+  // const publicMint = await genesisAContract.publicMint("0xe66e4D09c5906177d7855f9650f757f8bbB2FD2d", amountToMint, stringMetadata, numericMetadata, boolMetadata);
   // console.log(publicMint);
 
   // const hatchEgg = await genesisAContract.hatchFromEgg("0225ca3a-4a08-48f6-a799-33ff583b6f4d", 1);
@@ -103,7 +111,7 @@ async function main() {
   // const currentCount = (await genesisAContract.currentGenesisNBMonCount()) - 1;
   // console.log(currentCount);
 
-  // const ownerNBMons = await genesisAContract.getNFT(1);
+  // const ownerNBMons = await genesisAContract.getNFT(13);
   // console.log(ownerNBMons);
 
   // const mintWhitelist = await genesisAContract.whitelistedGenesisEggMint(owner, amountToMint, hatchingDuration, nbmonStats, types, potential, passives, isEgg);

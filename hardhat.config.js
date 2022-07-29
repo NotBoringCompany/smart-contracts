@@ -30,7 +30,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   defaultNetwork: "polygonTestnet",
   networks: {
     polygonTestnet: {
-      url: "https://rpc-mumbai.maticvigil.com",
+      url: "https://matic-mumbai.chainstacklabs.com",
       chainId: 80001,
       accounts: [`0x${accountOne}`]
     },
@@ -52,11 +52,10 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
       accounts: [`0x${accountOne}`]
     },
     ethRinkeby: {
-      url: `https://speedy-nodes-nyc.moralis.io/${moralisAPINode}/eth/rinkeby`,
-      // url: 'https://eth-rinkeby.alchemyapi.io/v2/WaN_fLthgNG17X2qVlz3DLj3K8AqRi9L',
+      url: `https://eth-rinkeby.alchemyapi.io/v2/WaN_fLthgNG17X2qVlz3DLj3K8AqRi9L`,
       chainId: 4,
       accounts: [`0x${accountOne}`]
-    }
+    },
   },
   solidity: {
   version: "0.8.13",
